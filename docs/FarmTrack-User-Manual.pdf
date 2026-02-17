@@ -1,0 +1,696 @@
+%PDF-1.3
+%ºß¬à
+3 0 obj
+<</Type /Page
+/Parent 1 0 R
+/Resources 2 0 R
+/MediaBox [0 0 595.2799999999999727 841.8899999999999864]
+/Contents 4 0 R
+>>
+endobj
+4 0 obj
+<<
+/Length 5320
+>>
+stream
+0.5670000000000001 w
+0 G
+BT
+/F2 20 Tf
+23. TL
+0 g
+51.0236220472441033 790.8663779527558972 Td
+(FarmTrack User Manual) Tj
+ET
+BT
+/F1 11 Tf
+12.6499999999999986 TL
+0 g
+51.0236220472441033 762.5199212598424765 Td
+(Version: 1.0 | Generated: February 15, 2026) Tj
+ET
+BT
+/F2 14 Tf
+16.0999999999999979 TL
+0 g
+51.0236220472441033 739.8427559055118081 Td
+(1. Purpose) Tj
+ET
+BT
+/F1 11 Tf
+12.6499999999999986 TL
+0 g
+51.0236220472441033 720.0002362204724022 Td
+(This manual explains how to use FarmTrack for daily farm operations, including account setup, adding) Tj
+T* (farms and crops, monitoring field activity, reading analytics, and exporting reports.) Tj
+ET
+BT
+/F2 14 Tf
+16.0999999999999979 TL
+0 g
+51.0236220472441033 683.1498425196850803 Td
+(2. Account Setup) Tj
+ET
+BT
+/F1 11 Tf
+12.6499999999999986 TL
+0 g
+51.0236220472441033 663.3073228346456744 Td
+(- Open the app and select Sign Up.) Tj
+ET
+BT
+/F1 11 Tf
+12.6499999999999986 TL
+0 g
+51.0236220472441033 646.2994488188976447 Td
+(- Enter full name, email, and password.) Tj
+ET
+BT
+/F1 11 Tf
+12.6499999999999986 TL
+0 g
+51.0236220472441033 629.291574803149615 Td
+(- Check email and complete verification.) Tj
+ET
+BT
+/F1 11 Tf
+12.6499999999999986 TL
+0 g
+51.0236220472441033 612.2837007874015853 Td
+(- Sign in and wait for account approval if your organization requires activation.) Tj
+ET
+BT
+/F2 14 Tf
+16.0999999999999979 TL
+0 g
+51.0236220472441033 592.4411811023621794 Td
+(3. Login and Navigation) Tj
+ET
+BT
+/F1 11 Tf
+12.6499999999999986 TL
+0 g
+51.0236220472441033 572.5986614173227736 Td
+(- Use Login with your registered email/password.) Tj
+ET
+BT
+/F1 11 Tf
+12.6499999999999986 TL
+0 g
+51.0236220472441033 555.5907874015747439 Td
+(- After login, the sidebar shows dashboard, monitoring, histories, projection, weather, reports, profile,) Tj
+T* (and users \(admin only\).) Tj
+ET
+BT
+/F1 11 Tf
+12.6499999999999986 TL
+0 g
+51.0236220472441033 521.5750393700786844 Td
+(- Use the top-right Logout button to end your session.) Tj
+ET
+BT
+/F2 14 Tf
+16.0999999999999979 TL
+0 g
+51.0236220472441033 501.7325196850393354 Td
+(4. Dashboard Workflow) Tj
+ET
+BT
+/F1 11 Tf
+12.6499999999999986 TL
+0 g
+51.0236220472441033 481.8899999999999295 Td
+(- Review top metrics: farms count, active crops, harvest in 14 days, cycle progress, and overdue) Tj
+T* (harvest.) Tj
+ET
+BT
+/F1 11 Tf
+12.6499999999999986 TL
+0 g
+51.0236220472441033 447.8742519685038701 Td
+(- Open farm cards to inspect current crop stage and timing.) Tj
+ET
+BT
+/F1 11 Tf
+12.6499999999999986 TL
+0 g
+51.0236220472441033 430.8663779527558404 Td
+(- Open field analytics links for deeper health indicators.) Tj
+ET
+BT
+/F1 11 Tf
+12.6499999999999986 TL
+0 g
+51.0236220472441033 413.8585039370078107 Td
+(- Use action buttons for Add Farm/Add Crop/Users when your role is admin.) Tj
+ET
+BT
+/F2 14 Tf
+16.0999999999999979 TL
+0 g
+51.0236220472441033 394.0159842519684616 Td
+(5. Add a Farm \(Admin\)) Tj
+ET
+BT
+/F1 11 Tf
+12.6499999999999986 TL
+0 g
+51.0236220472441033 374.1734645669290558 Td
+(- Go to Add Farm.) Tj
+ET
+BT
+/F1 11 Tf
+12.6499999999999986 TL
+0 g
+51.0236220472441033 357.1655905511810261 Td
+(- Enter farm name, location, code, and size in hectares.) Tj
+ET
+BT
+/F1 11 Tf
+12.6499999999999986 TL
+0 g
+51.0236220472441033 340.1577165354329964 Td
+(- Use map picker if location coordinates are needed.) Tj
+ET
+BT
+/F1 11 Tf
+12.6499999999999986 TL
+0 g
+51.0236220472441033 323.1498425196849666 Td
+(- Save and confirm farm appears on dashboard.) Tj
+ET
+BT
+/F2 14 Tf
+16.0999999999999979 TL
+0 g
+51.0236220472441033 303.3073228346455608 Td
+(6. Add a Crop \(Admin\)) Tj
+ET
+BT
+/F1 11 Tf
+12.6499999999999986 TL
+0 g
+51.0236220472441033 283.4648031496062686 Td
+(- Go to Add Crop and select the target farm.) Tj
+ET
+BT
+/F1 11 Tf
+12.6499999999999986 TL
+0 g
+51.0236220472441033 266.4569291338582389 Td
+(- Enter crop name, planting date, expected harvest, and cycle duration.) Tj
+ET
+BT
+/F1 11 Tf
+12.6499999999999986 TL
+0 g
+51.0236220472441033 249.4490551181102092 Td
+(- Provide field size hectares to support projection and capacity checks.) Tj
+ET
+BT
+/F1 11 Tf
+12.6499999999999986 TL
+0 g
+51.0236220472441033 232.4411811023621794 Td
+(- Save and verify crop appears in dashboard analytics.) Tj
+ET
+BT
+/F2 14 Tf
+16.0999999999999979 TL
+0 g
+51.0236220472441033 212.5986614173227736 Td
+(7. Monitoring Forms) Tj
+ET
+BT
+/F1 11 Tf
+12.6499999999999986 TL
+0 g
+51.0236220472441033 192.7561417322833677 Td
+(- Open Monitoring to record soil, growth, irrigation, pest, and fumigation data.) Tj
+ET
+BT
+/F1 11 Tf
+12.6499999999999986 TL
+0 g
+51.0236220472441033 175.748267716535338 Td
+(- Submit updates regularly to keep analytics current.) Tj
+ET
+BT
+/F1 11 Tf
+12.6499999999999986 TL
+0 g
+51.0236220472441033 158.7403937007873083 Td
+(- Use history pages to review all records by category.) Tj
+ET
+BT
+/F2 14 Tf
+16.0999999999999979 TL
+0 g
+51.0236220472441033 138.8978740157479024 Td
+(8. Projection and Analytics) Tj
+ET
+BT
+/F1 11 Tf
+12.6499999999999986 TL
+0 g
+51.0236220472441033 119.0553543307086102 Td
+(- Projection shows occupied vs free hectares by farm.) Tj
+ET
+BT
+/F1 11 Tf
+12.6499999999999986 TL
+0 g
+51.0236220472441033 102.0474803149605805 Td
+(- Field analytics provides soil, weather, growth, water, pest, and overall health indices.) Tj
+ET
+BT
+/F1 11 Tf
+12.6499999999999986 TL
+0 g
+51.0236220472441033 85.0396062992125508 Td
+(- Use these views for planning input allocation and harvest windows.) Tj
+ET
+endstream
+endobj
+5 0 obj
+<</Type /Page
+/Parent 1 0 R
+/Resources 2 0 R
+/MediaBox [0 0 595.2799999999999727 841.8899999999999864]
+/Contents 6 0 R
+>>
+endobj
+6 0 obj
+<<
+/Length 3828
+>>
+stream
+0.5670000000000001 w
+0 G
+BT
+/F2 14 Tf
+16.0999999999999979 TL
+0 g
+51.0236220472441033 790.8663779527558972 Td
+(9. Weather and Alerts) Tj
+ET
+BT
+/F1 11 Tf
+12.6499999999999986 TL
+0 g
+51.0236220472441033 771.0238582677164914 Td
+(- Open Weather for current and forecast conditions.) Tj
+ET
+BT
+/F1 11 Tf
+12.6499999999999986 TL
+0 g
+51.0236220472441033 754.0159842519684616 Td
+(- Check alert panels before irrigation, spraying, and harvest operations.) Tj
+ET
+BT
+/F1 11 Tf
+12.6499999999999986 TL
+0 g
+51.0236220472441033 737.0081102362204319 Td
+(- Adjust field operations when high-risk weather is expected.) Tj
+ET
+BT
+/F2 14 Tf
+16.0999999999999979 TL
+0 g
+51.0236220472441033 717.1655905511811397 Td
+(10. Reports and Export) Tj
+ET
+BT
+/F1 11 Tf
+12.6499999999999986 TL
+0 g
+51.0236220472441033 697.3230708661417339 Td
+(- Open Reports to view summary cards and trend data.) Tj
+ET
+BT
+/F1 11 Tf
+12.6499999999999986 TL
+0 g
+51.0236220472441033 680.3151968503937042 Td
+(- Export CSV for spreadsheet analysis.) Tj
+ET
+BT
+/F1 11 Tf
+12.6499999999999986 TL
+0 g
+51.0236220472441033 663.3073228346456744 Td
+(- Export PDF for management sharing and archive records.) Tj
+ET
+BT
+/F2 14 Tf
+16.0999999999999979 TL
+0 g
+51.0236220472441033 643.4648031496062686 Td
+(11. AI Farming Assistant) Tj
+ET
+BT
+/F1 11 Tf
+12.6499999999999986 TL
+0 g
+51.0236220472441033 623.6222834645668627 Td
+(- Click AI Chat \(floating button\).) Tj
+ET
+BT
+/F1 11 Tf
+12.6499999999999986 TL
+0 g
+51.0236220472441033 606.614409448818833 Td
+(- Ask focused questions on stage management, irrigation, pests, weather, or reporting.) Tj
+ET
+BT
+/F1 11 Tf
+12.6499999999999986 TL
+0 g
+51.0236220472441033 589.6065354330708033 Td
+(- If backend is unreachable, assistant returns offline fallback guidance.) Tj
+ET
+BT
+/F2 14 Tf
+16.0999999999999979 TL
+0 g
+51.0236220472441033 569.7640157480313974 Td
+(12. User Administration \(Admin\)) Tj
+ET
+BT
+/F1 11 Tf
+12.6499999999999986 TL
+0 g
+51.0236220472441033 549.9214960629921052 Td
+(- Open Users to view registered accounts.) Tj
+ET
+BT
+/F1 11 Tf
+12.6499999999999986 TL
+0 g
+51.0236220472441033 532.9136220472440755 Td
+(- Activate/deactivate accounts as needed.) Tj
+ET
+BT
+/F1 11 Tf
+12.6499999999999986 TL
+0 g
+51.0236220472441033 515.9057480314959321 Td
+(- Promote or demote admin role where authorized by policy.) Tj
+ET
+BT
+/F2 14 Tf
+16.0999999999999979 TL
+0 g
+51.0236220472441033 496.0632283464566399 Td
+(13. Troubleshooting) Tj
+ET
+BT
+/F1 10 Tf
+11.5 TL
+0 g
+51.0236220472441033 476.2207086614172908 Td
+(Cannot login: Verify email/password and internet connection.) Tj
+ET
+BT
+/F1 10 Tf
+11.5 TL
+0 g
+51.0236220472441033 459.2128346456692611 Td
+(Stuck on verification: Complete email verification, then login again.) Tj
+ET
+BT
+/F1 10 Tf
+11.5 TL
+0 g
+51.0236220472441033 442.2049606299212314 Td
+(No Add Farm/Add Crop buttons: Your account is not admin.) Tj
+ET
+BT
+/F1 10 Tf
+11.5 TL
+0 g
+51.0236220472441033 425.1970866141731449 Td
+(AI assistant unavailable: Run API server and verify .env provider settings.) Tj
+ET
+BT
+/F1 10 Tf
+11.5 TL
+0 g
+51.0236220472441033 408.1892125984251152 Td
+(No data in analytics: Ensure farms, crops, and monitoring records exist.) Tj
+ET
+BT
+/F2 14 Tf
+16.0999999999999979 TL
+0 g
+51.0236220472441033 388.3466929133857661 Td
+(14. Best Practices) Tj
+ET
+BT
+/F1 11 Tf
+12.6499999999999986 TL
+0 g
+51.0236220472441033 368.5041732283464171 Td
+(- Record monitoring data consistently \(daily or scheduled intervals\).) Tj
+ET
+BT
+/F1 11 Tf
+12.6499999999999986 TL
+0 g
+51.0236220472441033 351.4962992125983874 Td
+(- Keep crop dates and field sizes accurate for reliable projections.) Tj
+ET
+BT
+/F1 11 Tf
+12.6499999999999986 TL
+0 g
+51.0236220472441033 334.4884251968503008 Td
+(- Use reports weekly to detect risk trends early.) Tj
+ET
+BT
+/F1 11 Tf
+12.6499999999999986 TL
+0 g
+51.0236220472441033 317.480551181102328 Td
+(- Limit admin rights to trusted operators only.) Tj
+ET
+endstream
+endobj
+1 0 obj
+<</Type /Pages
+/Kids [3 0 R 5 0 R ]
+/Count 2
+>>
+endobj
+7 0 obj
+<<
+/Type /Font
+/BaseFont /Helvetica
+/Subtype /Type1
+/Encoding /WinAnsiEncoding
+/FirstChar 32
+/LastChar 255
+>>
+endobj
+8 0 obj
+<<
+/Type /Font
+/BaseFont /Helvetica-Bold
+/Subtype /Type1
+/Encoding /WinAnsiEncoding
+/FirstChar 32
+/LastChar 255
+>>
+endobj
+9 0 obj
+<<
+/Type /Font
+/BaseFont /Helvetica-Oblique
+/Subtype /Type1
+/Encoding /WinAnsiEncoding
+/FirstChar 32
+/LastChar 255
+>>
+endobj
+10 0 obj
+<<
+/Type /Font
+/BaseFont /Helvetica-BoldOblique
+/Subtype /Type1
+/Encoding /WinAnsiEncoding
+/FirstChar 32
+/LastChar 255
+>>
+endobj
+11 0 obj
+<<
+/Type /Font
+/BaseFont /Courier
+/Subtype /Type1
+/Encoding /WinAnsiEncoding
+/FirstChar 32
+/LastChar 255
+>>
+endobj
+12 0 obj
+<<
+/Type /Font
+/BaseFont /Courier-Bold
+/Subtype /Type1
+/Encoding /WinAnsiEncoding
+/FirstChar 32
+/LastChar 255
+>>
+endobj
+13 0 obj
+<<
+/Type /Font
+/BaseFont /Courier-Oblique
+/Subtype /Type1
+/Encoding /WinAnsiEncoding
+/FirstChar 32
+/LastChar 255
+>>
+endobj
+14 0 obj
+<<
+/Type /Font
+/BaseFont /Courier-BoldOblique
+/Subtype /Type1
+/Encoding /WinAnsiEncoding
+/FirstChar 32
+/LastChar 255
+>>
+endobj
+15 0 obj
+<<
+/Type /Font
+/BaseFont /Times-Roman
+/Subtype /Type1
+/Encoding /WinAnsiEncoding
+/FirstChar 32
+/LastChar 255
+>>
+endobj
+16 0 obj
+<<
+/Type /Font
+/BaseFont /Times-Bold
+/Subtype /Type1
+/Encoding /WinAnsiEncoding
+/FirstChar 32
+/LastChar 255
+>>
+endobj
+17 0 obj
+<<
+/Type /Font
+/BaseFont /Times-Italic
+/Subtype /Type1
+/Encoding /WinAnsiEncoding
+/FirstChar 32
+/LastChar 255
+>>
+endobj
+18 0 obj
+<<
+/Type /Font
+/BaseFont /Times-BoldItalic
+/Subtype /Type1
+/Encoding /WinAnsiEncoding
+/FirstChar 32
+/LastChar 255
+>>
+endobj
+19 0 obj
+<<
+/Type /Font
+/BaseFont /ZapfDingbats
+/Subtype /Type1
+/FirstChar 32
+/LastChar 255
+>>
+endobj
+20 0 obj
+<<
+/Type /Font
+/BaseFont /Symbol
+/Subtype /Type1
+/FirstChar 32
+/LastChar 255
+>>
+endobj
+2 0 obj
+<<
+/ProcSet [/PDF /Text /ImageB /ImageC /ImageI]
+/Font <<
+/F1 7 0 R
+/F2 8 0 R
+/F3 9 0 R
+/F4 10 0 R
+/F5 11 0 R
+/F6 12 0 R
+/F7 13 0 R
+/F8 14 0 R
+/F9 15 0 R
+/F10 16 0 R
+/F11 17 0 R
+/F12 18 0 R
+/F13 19 0 R
+/F14 20 0 R
+>>
+/XObject <<
+>>
+>>
+endobj
+21 0 obj
+<<
+/Producer (jsPDF 4.1.0)
+/CreationDate (D:20260215134305+02'00')
+>>
+endobj
+22 0 obj
+<<
+/Type /Catalog
+/Pages 1 0 R
+/OpenAction [3 0 R /FitH null]
+/PageLayout /OneColumn
+>>
+endobj
+xref
+0 23
+0000000000 65535 f 
+0000009541 00000 n 
+0000011366 00000 n 
+0000000015 00000 n 
+0000000152 00000 n 
+0000005524 00000 n 
+0000005661 00000 n 
+0000009604 00000 n 
+0000009729 00000 n 
+0000009859 00000 n 
+0000009992 00000 n 
+0000010130 00000 n 
+0000010254 00000 n 
+0000010383 00000 n 
+0000010515 00000 n 
+0000010651 00000 n 
+0000010779 00000 n 
+0000010906 00000 n 
+0000011035 00000 n 
+0000011168 00000 n 
+0000011270 00000 n 
+0000011616 00000 n 
+0000011702 00000 n 
+trailer
+<<
+/Size 23
+/Root 22 0 R
+/Info 21 0 R
+/ID [ <646D28FA43047AE3B2A9FBB81C4BA61A> <646D28FA43047AE3B2A9FBB81C4BA61A> ]
+>>
+startxref
+11806
+%%EOF

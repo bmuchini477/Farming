@@ -1,0 +1,794 @@
+%PDF-1.3
+%ºß¬à
+3 0 obj
+<</Type /Page
+/Parent 1 0 R
+/Resources 2 0 R
+/MediaBox [0 0 595.2799999999999727 841.8899999999999864]
+/Contents 4 0 R
+>>
+endobj
+4 0 obj
+<<
+/Length 5056
+>>
+stream
+0.5670000000000001 w
+0 G
+BT
+/F2 20 Tf
+23. TL
+0 g
+51.0236220472441033 790.8663779527558972 Td
+(FarmTrack Project Documentation) Tj
+ET
+BT
+/F1 11 Tf
+12.6499999999999986 TL
+0 g
+51.0236220472441033 762.5199212598424765 Td
+(Version: 1.0 | Generated: February 15, 2026) Tj
+ET
+BT
+/F2 14 Tf
+16.0999999999999979 TL
+0 g
+51.0236220472441033 739.8427559055118081 Td
+(1. Project Overview) Tj
+ET
+BT
+/F1 11 Tf
+12.6499999999999986 TL
+0 g
+51.0236220472441033 720.0002362204724022 Td
+(FarmTrack is a web-based farming management platform built with React and Firebase. It supports) Tj
+T* (farm setup, crop lifecycle tracking, field monitoring, weather views, user administration, and report) Tj
+T* (export. A backend Express service provides AI assistant responses using Gemini as primary provider) Tj
+T* (with Ollama fallback.) Tj
+ET
+BT
+/F2 14 Tf
+16.0999999999999979 TL
+0 g
+51.0236220472441033 649.1340944881889072 Td
+(2. Technology Stack) Tj
+ET
+BT
+/F1 11 Tf
+12.6499999999999986 TL
+0 g
+51.0236220472441033 629.291574803149615 Td
+(- Frontend: React 19, Vite 7, React Router, Recharts, React Leaflet.) Tj
+ET
+BT
+/F1 11 Tf
+12.6499999999999986 TL
+0 g
+51.0236220472441033 612.2837007874015853 Td
+(- Backend API: Node.js + Express.) Tj
+ET
+BT
+/F1 11 Tf
+12.6499999999999986 TL
+0 g
+51.0236220472441033 595.2758267716535556 Td
+(- Database and Auth: Firebase Firestore and Firebase Authentication.) Tj
+ET
+BT
+/F1 11 Tf
+12.6499999999999986 TL
+0 g
+51.0236220472441033 578.2679527559055259 Td
+(- AI Integration: Gemini API \(recommended\) with optional Ollama local fallback.) Tj
+ET
+BT
+/F1 11 Tf
+12.6499999999999986 TL
+0 g
+51.0236220472441033 561.2600787401574962 Td
+(- Utilities: PapaParse \(CSV\), jsPDF/html2canvas \(PDF/reporting\), ESLint.) Tj
+ET
+BT
+/F2 14 Tf
+16.0999999999999979 TL
+0 g
+51.0236220472441033 541.4175590551180903 Td
+(3. Repository Structure) Tj
+ET
+BT
+/F1 11 Tf
+12.6499999999999986 TL
+0 g
+51.0236220472441033 521.5750393700786844 Td
+(- src/components: Shared UI shell and assistant floating chat widget.) Tj
+ET
+BT
+/F1 11 Tf
+12.6499999999999986 TL
+0 g
+51.0236220472441033 504.5671653543306547 Td
+(- src/features/auth: Login, signup, email verification, auth guards.) Tj
+ET
+BT
+/F1 11 Tf
+12.6499999999999986 TL
+0 g
+51.0236220472441033 487.559291338582625 Td
+(- src/features/farms: Farm creation and map/location features.) Tj
+ET
+BT
+/F1 11 Tf
+12.6499999999999986 TL
+0 g
+51.0236220472441033 470.5514173228345953 Td
+(- src/features/crops: Dashboard, crop creation/details, monitoring, history, projection, analytics.) Tj
+ET
+BT
+/F1 11 Tf
+12.6499999999999986 TL
+0 g
+51.0236220472441033 453.5435433070865656 Td
+(- src/features/reports: Report generation and export.) Tj
+ET
+BT
+/F1 11 Tf
+12.6499999999999986 TL
+0 g
+51.0236220472441033 436.5356692913385359 Td
+(- src/features/users: User list, detail view, role/activation management.) Tj
+ET
+BT
+/F1 11 Tf
+12.6499999999999986 TL
+0 g
+51.0236220472441033 419.5277952755905062 Td
+(- src/features/weather: Weather dashboards and alerts.) Tj
+ET
+BT
+/F1 11 Tf
+12.6499999999999986 TL
+0 g
+51.0236220472441033 402.5199212598424765 Td
+(- server/index.js: Assistant API service.) Tj
+ET
+BT
+/F2 14 Tf
+16.0999999999999979 TL
+0 g
+51.0236220472441033 382.6774015748030706 Td
+(4. Route Map) Tj
+ET
+BT
+/F1 10 Tf
+11.5 TL
+0 g
+51.0236220472441033 362.8348818897637216 Td
+(/: Landing page) Tj
+ET
+BT
+/F1 10 Tf
+11.5 TL
+0 g
+51.0236220472441033 345.8270078740156919 Td
+(/login: Login page) Tj
+ET
+BT
+/F1 10 Tf
+11.5 TL
+0 g
+51.0236220472441033 328.8191338582676053 Td
+(/signup: Signup page) Tj
+ET
+BT
+/F1 10 Tf
+11.5 TL
+0 g
+51.0236220472441033 311.8112598425195756 Td
+(/verify-email: Email verification flow) Tj
+ET
+BT
+/F1 10 Tf
+11.5 TL
+0 g
+51.0236220472441033 294.8033858267715459 Td
+(/account-pending: Approval pending page) Tj
+ET
+BT
+/F1 10 Tf
+11.5 TL
+0 g
+51.0236220472441033 277.7955118110235162 Td
+(/app: Protected application shell and dashboard) Tj
+ET
+BT
+/F1 10 Tf
+11.5 TL
+0 g
+51.0236220472441033 260.7876377952754865 Td
+(/app/farms/new: Add farm) Tj
+ET
+BT
+/F1 10 Tf
+11.5 TL
+0 g
+51.0236220472441033 243.7797637795274568 Td
+(/app/crops/new: Add crop) Tj
+ET
+BT
+/F1 10 Tf
+11.5 TL
+0 g
+51.0236220472441033 226.7718897637794271 Td
+(/app/crops/:id: Crop detail) Tj
+ET
+BT
+/F1 10 Tf
+11.5 TL
+0 g
+51.0236220472441033 209.7640157480313974 Td
+(/app/monitoring: Monitoring hub) Tj
+ET
+BT
+/F1 10 Tf
+11.5 TL
+0 g
+51.0236220472441033 192.7561417322833677 Td
+(/app/history/:type: History records by type) Tj
+ET
+BT
+/F1 10 Tf
+11.5 TL
+0 g
+51.0236220472441033 175.748267716535338 Td
+(/app/projection: Farm projection) Tj
+ET
+BT
+/F1 10 Tf
+11.5 TL
+0 g
+51.0236220472441033 158.7403937007873083 Td
+(/app/fields/analytics: Field analytics) Tj
+ET
+BT
+/F1 10 Tf
+11.5 TL
+0 g
+51.0236220472441033 141.7325196850392786 Td
+(/app/reports: Reports and export) Tj
+ET
+BT
+/F1 10 Tf
+11.5 TL
+0 g
+51.0236220472441033 124.7246456692912489 Td
+(/app/weather: Weather page) Tj
+ET
+BT
+/F1 10 Tf
+11.5 TL
+0 g
+51.0236220472441033 107.7167716535432191 Td
+(/app/users: Users management \(admin UI visibility\)) Tj
+ET
+BT
+/F1 10 Tf
+11.5 TL
+0 g
+51.0236220472441033 90.7088976377951894 Td
+(/app/profile: Profile page) Tj
+ET
+endstream
+endobj
+5 0 obj
+<</Type /Page
+/Parent 1 0 R
+/Resources 2 0 R
+/MediaBox [0 0 595.2799999999999727 841.8899999999999864]
+/Contents 6 0 R
+>>
+endobj
+6 0 obj
+<<
+/Length 5733
+>>
+stream
+0.5670000000000001 w
+0 G
+BT
+/F2 14 Tf
+16.0999999999999979 TL
+0 g
+51.0236220472441033 790.8663779527558972 Td
+(5. Data Model Summary) Tj
+ET
+BT
+/F1 11 Tf
+12.6499999999999986 TL
+0 g
+51.0236220472441033 771.0238582677164914 Td
+(- users/{uid}: profile metadata including isAdmin and isActive flags.) Tj
+ET
+BT
+/F1 11 Tf
+12.6499999999999986 TL
+0 g
+51.0236220472441033 754.0159842519684616 Td
+(- users/{uid}/fields/{farmId}: farm-level structure.) Tj
+ET
+BT
+/F1 11 Tf
+12.6499999999999986 TL
+0 g
+51.0236220472441033 737.0081102362204319 Td
+(- users/{uid}/fields/{farmId}/seasons/{seasonId}: season and crop state.) Tj
+ET
+BT
+/F1 11 Tf
+12.6499999999999986 TL
+0 g
+51.0236220472441033 720.0002362204724022 Td
+(- users/{uid}/notifications/{notificationId}: in-app notifications.) Tj
+ET
+BT
+/F1 11 Tf
+12.6499999999999986 TL
+0 g
+51.0236220472441033 702.9923622047243725 Td
+(- Some components read both users and Users collections for compatibility.) Tj
+ET
+BT
+/F2 14 Tf
+16.0999999999999979 TL
+0 g
+51.0236220472441033 683.1498425196850803 Td
+(6. Environment Configuration) Tj
+ET
+BT
+/F1 11 Tf
+12.6499999999999986 TL
+0 g
+51.0236220472441033 663.3073228346456744 Td
+(Create or update .env at project root. Main variables:) Tj
+ET
+BT
+/F1 10 Tf
+11.5 TL
+0 g
+51.0236220472441033 643.4648031496062686 Td
+(GEMINI_API_KEY: Gemini API key \(if set, Gemini is used\)) Tj
+ET
+BT
+/F1 10 Tf
+11.5 TL
+0 g
+51.0236220472441033 626.4569291338582389 Td
+(GEMINI_MODEL: Gemini model id, default gemini-2.5-flash) Tj
+ET
+BT
+/F1 10 Tf
+11.5 TL
+0 g
+51.0236220472441033 609.4490551181102092 Td
+(OLLAMA_BASE_URL: Ollama host for local fallback) Tj
+ET
+BT
+/F1 10 Tf
+11.5 TL
+0 g
+51.0236220472441033 592.4411811023621794 Td
+(OLLAMA_MODEL: Ollama model name) Tj
+ET
+BT
+/F1 10 Tf
+11.5 TL
+0 g
+51.0236220472441033 575.4333070866141497 Td
+(PORT: Assistant API port \(default in this project: 8793\)) Tj
+ET
+BT
+/F1 10 Tf
+11.5 TL
+0 g
+51.0236220472441033 558.42543307086612 Td
+(VITE_ASSISTANT_API_URL: Optional frontend override when API is remote) Tj
+ET
+BT
+/F2 14 Tf
+16.0999999999999979 TL
+0 g
+51.0236220472441033 538.5829133858267141 Td
+(7. Running the Project) Tj
+ET
+BT
+/F1 11 Tf
+12.6499999999999986 TL
+0 g
+51.0236220472441033 518.7403937007873083 Td
+(- Install dependencies: npm install) Tj
+ET
+BT
+/F1 11 Tf
+12.6499999999999986 TL
+0 g
+51.0236220472441033 501.7325196850393354 Td
+(- Start frontend only: npm run dev) Tj
+ET
+BT
+/F1 11 Tf
+12.6499999999999986 TL
+0 g
+51.0236220472441033 484.7246456692913057 Td
+(- Start API only: npm run api) Tj
+ET
+BT
+/F1 11 Tf
+12.6499999999999986 TL
+0 g
+51.0236220472441033 467.716771653543276 Td
+(- Start both frontend and API: npm run dev:all) Tj
+ET
+BT
+/F1 11 Tf
+12.6499999999999986 TL
+0 g
+51.0236220472441033 450.7088976377952463 Td
+(- Build production bundle: npm run build) Tj
+ET
+BT
+/F1 11 Tf
+12.6499999999999986 TL
+0 g
+51.0236220472441033 433.7010236220471597 Td
+(- Preview production build: npm run preview) Tj
+ET
+BT
+/F2 14 Tf
+16.0999999999999979 TL
+0 g
+51.0236220472441033 413.8585039370078107 Td
+(8. Assistant API Endpoints) Tj
+ET
+BT
+/F1 10 Tf
+11.5 TL
+0 g
+51.0236220472441033 394.0159842519684616 Td
+(GET /api/health: Status, provider, model, and timestamp) Tj
+ET
+BT
+/F1 10 Tf
+11.5 TL
+0 g
+51.0236220472441033 377.0081102362204319 Td
+(POST /api/assistant: Generates AI response from prompt + farm context payload) Tj
+ET
+BT
+/F2 14 Tf
+16.0999999999999979 TL
+0 g
+51.0236220472441033 357.1655905511810261 Td
+(9. Security and Access Notes) Tj
+ET
+BT
+/F1 11 Tf
+12.6499999999999986 TL
+0 g
+51.0236220472441033 337.323070866141677 Td
+(- Authentication is required for /app routes.) Tj
+ET
+BT
+/F1 11 Tf
+12.6499999999999986 TL
+0 g
+51.0236220472441033 320.3151968503935905 Td
+(- UI now gates Add Farm, Add Crop, and Users buttons by isAdmin status.) Tj
+ET
+BT
+/F1 11 Tf
+12.6499999999999986 TL
+0 g
+51.0236220472441033 303.3073228346455608 Td
+(- Email verification is enforced before entering app shell.) Tj
+ET
+BT
+/F1 11 Tf
+12.6499999999999986 TL
+0 g
+51.0236220472441033 286.2994488188975311 Td
+(- Signup sets isAdmin false and isActive false by default.) Tj
+ET
+BT
+/F1 11 Tf
+12.6499999999999986 TL
+0 g
+51.0236220472441033 269.2915748031495013 Td
+(- Use Firestore Security Rules to enforce role permissions server-side.) Tj
+ET
+BT
+/F2 14 Tf
+16.0999999999999979 TL
+0 g
+51.0236220472441033 249.4490551181102092 Td
+(10. Known Operational Notes) Tj
+ET
+BT
+/F1 11 Tf
+12.6499999999999986 TL
+0 g
+51.0236220472441033 229.6065354330708033 Td
+(- Keep frontend and API running together for full assistant functionality.) Tj
+ET
+BT
+/F1 11 Tf
+12.6499999999999986 TL
+0 g
+51.0236220472441033 212.5986614173227736 Td
+(- If Gemini is unavailable, API falls back to Ollama when configured.) Tj
+ET
+BT
+/F1 11 Tf
+12.6499999999999986 TL
+0 g
+51.0236220472441033 195.5907874015747439 Td
+(- If role flags do not appear, verify user document exists in users collection.) Tj
+ET
+BT
+/F1 11 Tf
+12.6499999999999986 TL
+0 g
+51.0236220472441033 178.5829133858267141 Td
+(- Large JS chunks appear in production build warning; consider code splitting.) Tj
+ET
+BT
+/F2 14 Tf
+16.0999999999999979 TL
+0 g
+51.0236220472441033 158.7403937007873083 Td
+(11. Maintenance Checklist) Tj
+ET
+BT
+/F1 11 Tf
+12.6499999999999986 TL
+0 g
+51.0236220472441033 138.8978740157479024 Td
+(- Review and rotate API keys periodically.) Tj
+ET
+BT
+/F1 11 Tf
+12.6499999999999986 TL
+0 g
+51.0236220472441033 121.8899999999998727 Td
+(- Validate Firestore indexes and security rules after schema changes.) Tj
+ET
+BT
+/F1 11 Tf
+12.6499999999999986 TL
+0 g
+51.0236220472441033 104.882125984251843 Td
+(- Re-test signup, verification, admin role visibility, and report export after releases.) Tj
+ET
+BT
+/F1 11 Tf
+12.6499999999999986 TL
+0 g
+51.0236220472441033 87.8742519685038133 Td
+(- Regenerate this PDF after major route, model, or environment changes.) Tj
+ET
+endstream
+endobj
+1 0 obj
+<</Type /Pages
+/Kids [3 0 R 5 0 R ]
+/Count 2
+>>
+endobj
+7 0 obj
+<<
+/Type /Font
+/BaseFont /Helvetica
+/Subtype /Type1
+/Encoding /WinAnsiEncoding
+/FirstChar 32
+/LastChar 255
+>>
+endobj
+8 0 obj
+<<
+/Type /Font
+/BaseFont /Helvetica-Bold
+/Subtype /Type1
+/Encoding /WinAnsiEncoding
+/FirstChar 32
+/LastChar 255
+>>
+endobj
+9 0 obj
+<<
+/Type /Font
+/BaseFont /Helvetica-Oblique
+/Subtype /Type1
+/Encoding /WinAnsiEncoding
+/FirstChar 32
+/LastChar 255
+>>
+endobj
+10 0 obj
+<<
+/Type /Font
+/BaseFont /Helvetica-BoldOblique
+/Subtype /Type1
+/Encoding /WinAnsiEncoding
+/FirstChar 32
+/LastChar 255
+>>
+endobj
+11 0 obj
+<<
+/Type /Font
+/BaseFont /Courier
+/Subtype /Type1
+/Encoding /WinAnsiEncoding
+/FirstChar 32
+/LastChar 255
+>>
+endobj
+12 0 obj
+<<
+/Type /Font
+/BaseFont /Courier-Bold
+/Subtype /Type1
+/Encoding /WinAnsiEncoding
+/FirstChar 32
+/LastChar 255
+>>
+endobj
+13 0 obj
+<<
+/Type /Font
+/BaseFont /Courier-Oblique
+/Subtype /Type1
+/Encoding /WinAnsiEncoding
+/FirstChar 32
+/LastChar 255
+>>
+endobj
+14 0 obj
+<<
+/Type /Font
+/BaseFont /Courier-BoldOblique
+/Subtype /Type1
+/Encoding /WinAnsiEncoding
+/FirstChar 32
+/LastChar 255
+>>
+endobj
+15 0 obj
+<<
+/Type /Font
+/BaseFont /Times-Roman
+/Subtype /Type1
+/Encoding /WinAnsiEncoding
+/FirstChar 32
+/LastChar 255
+>>
+endobj
+16 0 obj
+<<
+/Type /Font
+/BaseFont /Times-Bold
+/Subtype /Type1
+/Encoding /WinAnsiEncoding
+/FirstChar 32
+/LastChar 255
+>>
+endobj
+17 0 obj
+<<
+/Type /Font
+/BaseFont /Times-Italic
+/Subtype /Type1
+/Encoding /WinAnsiEncoding
+/FirstChar 32
+/LastChar 255
+>>
+endobj
+18 0 obj
+<<
+/Type /Font
+/BaseFont /Times-BoldItalic
+/Subtype /Type1
+/Encoding /WinAnsiEncoding
+/FirstChar 32
+/LastChar 255
+>>
+endobj
+19 0 obj
+<<
+/Type /Font
+/BaseFont /ZapfDingbats
+/Subtype /Type1
+/FirstChar 32
+/LastChar 255
+>>
+endobj
+20 0 obj
+<<
+/Type /Font
+/BaseFont /Symbol
+/Subtype /Type1
+/FirstChar 32
+/LastChar 255
+>>
+endobj
+2 0 obj
+<<
+/ProcSet [/PDF /Text /ImageB /ImageC /ImageI]
+/Font <<
+/F1 7 0 R
+/F2 8 0 R
+/F3 9 0 R
+/F4 10 0 R
+/F5 11 0 R
+/F6 12 0 R
+/F7 13 0 R
+/F8 14 0 R
+/F9 15 0 R
+/F10 16 0 R
+/F11 17 0 R
+/F12 18 0 R
+/F13 19 0 R
+/F14 20 0 R
+>>
+/XObject <<
+>>
+>>
+endobj
+21 0 obj
+<<
+/Producer (jsPDF 4.1.0)
+/CreationDate (D:20260215134305+02'00')
+>>
+endobj
+22 0 obj
+<<
+/Type /Catalog
+/Pages 1 0 R
+/OpenAction [3 0 R /FitH null]
+/PageLayout /OneColumn
+>>
+endobj
+xref
+0 23
+0000000000 65535 f 
+0000011182 00000 n 
+0000013007 00000 n 
+0000000015 00000 n 
+0000000152 00000 n 
+0000005260 00000 n 
+0000005397 00000 n 
+0000011245 00000 n 
+0000011370 00000 n 
+0000011500 00000 n 
+0000011633 00000 n 
+0000011771 00000 n 
+0000011895 00000 n 
+0000012024 00000 n 
+0000012156 00000 n 
+0000012292 00000 n 
+0000012420 00000 n 
+0000012547 00000 n 
+0000012676 00000 n 
+0000012809 00000 n 
+0000012911 00000 n 
+0000013257 00000 n 
+0000013343 00000 n 
+trailer
+<<
+/Size 23
+/Root 22 0 R
+/Info 21 0 R
+/ID [ <39C6FB78F67421F96DBDEAA6135DD32D> <39C6FB78F67421F96DBDEAA6135DD32D> ]
+>>
+startxref
+13447
+%%EOF
