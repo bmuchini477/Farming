@@ -25,7 +25,7 @@ Follow these simple steps to activate your free farming assistant:
 **Example:**
 
 ```env
-GEMINI_API_KEY=AIzaSyDXXXXXXXXXXXXXXXXXXXXXXXXXXXXX
+GEMINI_API_KEY=your_real_gemini_api_key_value
 ```
 
 ---
@@ -82,7 +82,7 @@ Your farming assistant is now powered by Google Gemini AI - completely free and 
 
 **API Key Not Working?**
 
-- Make sure you copied the entire key (starts with `AIza`)
+- Make sure you copied the entire key value from AI Studio
 - Check there are no extra spaces before or after the key
 - Verify you've restarted the server after adding the key
 
