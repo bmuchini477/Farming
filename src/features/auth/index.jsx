@@ -87,6 +87,10 @@ export default function LandingPage() {
     };
   }, []);
 
+  if (weather.loading) {
+    return <LoadingAnimation label="Preparing your farming dashboard..." scope="viewport" />;
+  }
+
   return (
     <div className="lp-page">
       <div className="lp-backdrop" />
@@ -147,11 +151,7 @@ export default function LandingPage() {
             />
             <div className="lp-media-badge">
               <p>Current Weather</p>
-              {weather.loading ? (
-                <LoadingAnimation label="Loading weather..." size="sm" inline />
-              ) : (
-                <strong>{weather.temp != null ? `${Math.round(weather.temp)}°C | ${weather.label}` : "Weather unavailable"}</strong>
-              )}
+              <strong>{weather.temp != null ? `${Math.round(weather.temp)}°C | ${weather.label}` : "Weather unavailable"}</strong>
               <span className="lp-badge-meta">Field Health: {weather.fieldHealth || "Unknown"}</span>
             </div>
           </div>
