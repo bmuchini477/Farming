@@ -1094,6 +1094,113 @@
   border: 1px solid rgba(15, 93, 66, 0.26);
 }
 
+.app-btn-danger {
+  background: linear-gradient(135deg, #b91c1c, #dc2626);
+  color: #ffffff;
+  box-shadow: 0 11px 22px rgba(185, 28, 28, 0.24);
+}
+
+.farm-details-hero {
+  border-color: rgba(15, 93, 66, 0.22);
+}
+
+.farm-details-hero-head {
+  margin-bottom: 1rem;
+}
+
+.farm-details-kicker {
+  margin: 0 0 0.36rem;
+  color: #0f6e4b;
+  font-size: 0.72rem;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  font-weight: 800;
+}
+
+.farm-details-meta-row {
+  margin-top: 0.55rem;
+  display: flex;
+  gap: 0.45rem;
+  flex-wrap: wrap;
+}
+
+.farm-details-stat-grid {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: 0.72rem;
+}
+
+.farm-details-stat-grid .app-stat-card {
+  min-height: 108px;
+  display: grid;
+  align-content: center;
+}
+
+.farm-details-stat-grid .app-stat-card strong {
+  font-size: 1.04rem;
+}
+
+.farm-details-grid {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 0.8rem;
+}
+
+.farm-details-panel {
+  border: 1px solid rgba(15, 93, 66, 0.16);
+  border-radius: 14px;
+  padding: 0.86rem;
+  background: var(--app-card-surface-soft);
+  box-shadow: inset 0 0 0 1px rgba(255, 255, 255, 0.42);
+}
+
+.farm-details-panel-full {
+  grid-column: 1 / -1;
+}
+
+.farm-details-panel-title {
+  margin: 0;
+  color: var(--app-green-900);
+  font-size: 1rem;
+}
+
+.farm-details-list {
+  margin: 0.74rem 0 0;
+  display: grid;
+  gap: 0.45rem;
+}
+
+.farm-details-row {
+  border: 1px solid rgba(15, 93, 66, 0.12);
+  border-radius: 10px;
+  padding: 0.56rem 0.62rem;
+  background: rgba(255, 255, 255, 0.66);
+}
+
+.farm-details-row dt {
+  margin: 0;
+  color: #5f746c;
+  font-size: 0.76rem;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  font-weight: 700;
+}
+
+.farm-details-row dd {
+  margin: 0.16rem 0 0;
+  color: #132026;
+  font-size: 0.9rem;
+  font-weight: 700;
+  word-break: break-word;
+}
+
+.farm-details-notes {
+  margin: 0.65rem 0 0;
+  color: #304149;
+  line-height: 1.6;
+  font-size: 0.9rem;
+}
+
 .app-btn-map-green {
   border-radius: 10px;
   background: linear-gradient(
@@ -1656,6 +1763,14 @@
     grid-template-columns: 1fr;
   }
 
+  .farm-details-stat-grid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+
+  .farm-details-grid {
+    grid-template-columns: 1fr;
+  }
+
   .app-monitoring-layout {
     grid-template-columns: 1fr;
   }
@@ -1695,6 +1810,10 @@
 
   .app-stat-grid,
   .app-stat-grid-5 {
+    grid-template-columns: 1fr;
+  }
+
+  .farm-details-stat-grid {
     grid-template-columns: 1fr;
   }
 

@@ -1,7 +1,29 @@
 .app-loading-wrap {
-  display: grid;
-  place-items: center;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  gap: 1.5rem;
   padding: 0;
+}
+
+.app-loading-logo {
+  width: 80px;
+  height: 80px;
+  object-fit: contain;
+  animation: app-logo-pulse 2s ease-in-out infinite;
+}
+
+@keyframes app-logo-pulse {
+  0%,
+  100% {
+    transform: scale(0.95);
+    opacity: 0.8;
+  }
+  50% {
+    transform: scale(1);
+    opacity: 1;
+  }
 }
 
 .app-loading-wrap-inline {

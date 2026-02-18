@@ -9,6 +9,13 @@ export default function LoadingAnimation({ label = "Loading", scope = "viewport"
 
   return (
     <div className={wrapClass} role="status" aria-live="polite" aria-label={label}>
+      {(scope === "viewport" || scope === "container") && (
+        <img 
+          src="/assets/favcon.png" 
+          alt="Loading..." 
+          className="app-loading-logo"
+        />
+      )}
       <div className="app-loading-dots" aria-hidden="true">
         <span />
         <span />

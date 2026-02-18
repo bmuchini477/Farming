@@ -5,6 +5,25 @@ import { useAdminStatus } from "../auth/useAdminStatus";
 import { getFarm, updateFarm, deleteFarm } from "./farms.service";
 import LoadingAnimation from "../../components/LoadingAnimation";
 
+function valueOrFallback(value, fallback = "Not specified") {
+  const hasValue = value !== null && value !== undefined && String(value).trim() !== "";
+  return hasValue ? value : fallback;
+}
+
+function formatDate(value) {
+  if (!value) return "Not available";
+  const date = new Date(Number(value));
+  if (Number.isNaN(date.getTime())) return "Not available";
+  return date.toLocaleDateString(undefined, { year: "numeric", month: "short", day: "numeric" });
+}
+
+function formatCoordinates(latitude, longitude) {
+  const lat = Number(latitude);
+  const lng = Number(longitude);
+  if (!Number.isFinite(lat) || !Number.isFinite(lng)) return "Not pinned";
+  return `${lat.toFixed(5)}, ${lng.toFixed(5)}`;
+}
+
 export default function FarmManagementPage() {
   const { id } = useParams();
   const navigate = useNavigate();
@@ -96,191 +115,189 @@ export default function FarmManagementPage() {
     );
   }
 
+  const profileItems = [
+    { label: "Farm Code", value: valueOrFallback(farm.farmCode, "Unassigned") },
+    { label: "Location", value: valueOrFallback(farm.location) },
+    { label: "Coordinates", value: formatCoordinates(farm.latitude, farm.longitude) },
+    { label: "Field Size", value: `${Number(farm.sizeHectares || 0).toLocaleString()} ha` },
+  ];
+
+  const operationItems = [
+    { label: "Soil Type", value: valueOrFallback(farm.soilType) },
+    { label: "Water Source", value: valueOrFallback(farm.waterSource) },
+    { label: "Irrigation Setup", value: valueOrFallback(farm.irrigationSetup) },
+    { label: "Storage Available", value: valueOrFallback(farm.storageAvailable) },
+    { label: "Ownership Type", value: valueOrFallback(farm.ownershipType) },
+    { label: "Access Road", value: valueOrFallback(farm.accessRoad) },
+  ];
+
+  const contactItems = [
+    { label: "Manager", value: valueOrFallback(farm.managerName, "Not assigned") },
+    { label: "Contact Phone", value: valueOrFallback(farm.contactPhone, "No contact info") },
+    { label: "Created", value: formatDate(farm.createdAt) },
+    { label: "Last Updated", value: formatDate(farm.updatedAt) },
+  ];
+
   return (
     <div className="app-page-stack">
-      <section className="app-card">
-        <div className="app-card-head app-card-head-split">
+      <section className="app-card farm-details-hero">
+        <div className="app-card-head app-card-head-split farm-details-hero-head">
           <div>
-            <h1 className="app-title">{isEditing ? "Edit Farm" : farm.name}</h1>
+            <p className="farm-details-kicker">Farm Details</p>
+            <h1 className="app-title">{isEditing ? "Edit Farm Profile" : farm.name}</h1>
             <p className="app-subtitle">
-              {isEditing ? "Modify farm information below." : `Farm Code: ${farm.farmCode}`}
+              {isEditing
+                ? "Update key farm information below and save changes when done."
+                : "Structured summary of farm profile, operations, and contact information."}
             </p>
+            <div className="farm-details-meta-row">
+              <span className="app-pill">{valueOrFallback(farm.farmCode, "No farm code")}</span>
+              <span className="app-pill">{valueOrFallback(farm.location)}</span>
+            </div>
           </div>
           <div className="app-actions-row">
-            <button 
-              onClick={() => navigate(-1)} 
-              className="app-btn app-btn-outline"
-              disabled={saving}
-            >
+            <button onClick={() => navigate(-1)} className="app-btn app-btn-outline" disabled={saving}>
               Back
             </button>
             {isAdmin && !isEditing && (
               <>
-                <button 
-                  onClick={() => setIsEditing(true)} 
-                  className="app-btn app-btn-solid"
-                >
+                <button onClick={() => setIsEditing(true)} className="app-btn app-btn-solid">
                   Edit Farm
                 </button>
-                <button 
-                  onClick={handleDelete} 
-                  className="app-btn app-btn-danger"
-                  style={{ backgroundColor: "#dc2626", color: "white" }}
-                >
+                <button onClick={handleDelete} className="app-btn app-btn-danger" disabled={saving}>
                   Delete Farm
                 </button>
               </>
             )}
           </div>
         </div>
+
+        <div className="farm-details-stat-grid">
+          <article className="app-stat-card">
+            <p>Field Size</p>
+            <strong>{`${Number(farm.sizeHectares || 0).toLocaleString()} ha`}</strong>
+          </article>
+          <article className="app-stat-card">
+            <p>Manager</p>
+            <strong>{valueOrFallback(farm.managerName, "Unassigned")}</strong>
+          </article>
+          <article className="app-stat-card">
+            <p>Coordinates</p>
+            <strong>{formatCoordinates(farm.latitude, farm.longitude)}</strong>
+          </article>
+          <article className="app-stat-card">
+            <p>Last Updated</p>
+            <strong>{formatDate(farm.updatedAt || farm.createdAt)}</strong>
+          </article>
+        </div>
       </section>
 
       <section className="app-card">
         {isEditing ? (
-          <form onSubmit={handleUpdate} className="app-form">
-            <div className="app-form-grid">
-              <div className="app-form-group">
-                <label>Farm Name</label>
-                <input
-                  type="text"
-                  name="name"
-                  value={formData.name || ""}
-                  onChange={handleChange}
-                  required
-                />
-              </div>
-              <div className="app-form-group">
-                <label>Size (Hectares)</label>
-                <input
-                  type="number"
-                  name="sizeHectares"
-                  value={formData.sizeHectares || ""}
-                  onChange={handleChange}
-                  step="0.01"
-                />
-              </div>
-              <div className="app-form-group">
-                <label>Location / Province</label>
-                <input
-                  type="text"
-                  name="location"
-                  value={formData.location || ""}
-                  onChange={handleChange}
-                />
-              </div>
-              <div className="app-form-group">
-                <label>Manager Name</label>
-                <input
-                  type="text"
-                  name="managerName"
-                  value={formData.managerName || ""}
-                  onChange={handleChange}
-                />
-              </div>
-              <div className="app-form-group">
-                <label>Contact Phone</label>
-                <input
-                  type="tel"
-                  name="contactPhone"
-                  value={formData.contactPhone || ""}
-                  onChange={handleChange}
-                />
-              </div>
-              <div className="app-form-group">
-                <label>Soil Type</label>
-                <input
-                  type="text"
-                  name="soilType"
-                  value={formData.soilType || ""}
-                  onChange={handleChange}
-                />
-              </div>
-              <div className="app-form-group">
-                <label>Water Source</label>
-                <input
-                  type="text"
-                  name="waterSource"
-                  value={formData.waterSource || ""}
-                  onChange={handleChange}
-                />
-              </div>
-              <div className="app-form-group">
-                <label>Ownership Type</label>
-                <input
-                  type="text"
-                  name="ownershipType"
-                  value={formData.ownershipType || ""}
-                  onChange={handleChange}
-                />
-              </div>
-            </div>
-
-            <div className="app-form-group">
-              <label>Notes</label>
-              <textarea
-                name="notes"
-                value={formData.notes || ""}
-                onChange={handleChange}
-                rows="4"
-              />
-            </div>
-
-            <div className="app-form-actions">
-              <button 
-                type="button" 
-                onClick={() => setIsEditing(false)} 
-                className="app-btn app-btn-outline"
-                disabled={saving}
-              >
+          <form onSubmit={handleUpdate} className="app-form-grid app-form-grid-compact">
+            <label className="app-field">
+              <span>Farm Name</span>
+              <input className="app-input" type="text" name="name" value={formData.name || ""} onChange={handleChange} required />
+            </label>
+            <label className="app-field">
+              <span>Size (Hectares)</span>
+              <input className="app-input" type="number" name="sizeHectares" value={formData.sizeHectares || ""} onChange={handleChange} step="0.01" min="0" />
+            </label>
+            <label className="app-field">
+              <span>Location / Province</span>
+              <input className="app-input" type="text" name="location" value={formData.location || ""} onChange={handleChange} />
+            </label>
+            <label className="app-field">
+              <span>Manager Name</span>
+              <input className="app-input" type="text" name="managerName" value={formData.managerName || ""} onChange={handleChange} />
+            </label>
+            <label className="app-field">
+              <span>Contact Phone</span>
+              <input className="app-input" type="tel" name="contactPhone" value={formData.contactPhone || ""} onChange={handleChange} />
+            </label>
+            <label className="app-field">
+              <span>Soil Type</span>
+              <input className="app-input" type="text" name="soilType" value={formData.soilType || ""} onChange={handleChange} />
+            </label>
+            <label className="app-field">
+              <span>Water Source</span>
+              <input className="app-input" type="text" name="waterSource" value={formData.waterSource || ""} onChange={handleChange} />
+            </label>
+            <label className="app-field">
+              <span>Irrigation Setup</span>
+              <input className="app-input" type="text" name="irrigationSetup" value={formData.irrigationSetup || ""} onChange={handleChange} />
+            </label>
+            <label className="app-field">
+              <span>Ownership Type</span>
+              <input className="app-input" type="text" name="ownershipType" value={formData.ownershipType || ""} onChange={handleChange} />
+            </label>
+            <label className="app-field">
+              <span>Storage Available</span>
+              <input className="app-input" type="text" name="storageAvailable" value={formData.storageAvailable || ""} onChange={handleChange} />
+            </label>
+            <label className="app-field">
+              <span>Access Road</span>
+              <input className="app-input" type="text" name="accessRoad" value={formData.accessRoad || ""} onChange={handleChange} />
+            </label>
+            <label className="app-field">
+              <span>Farm Code</span>
+              <input className="app-input" type="text" name="farmCode" value={formData.farmCode || ""} onChange={handleChange} />
+            </label>
+            <label className="app-field app-field-wide">
+              <span>Notes</span>
+              <textarea className="app-textarea" name="notes" value={formData.notes || ""} onChange={handleChange} rows="4" />
+            </label>
+            <div className="app-actions-row app-field-wide">
+              <button type="button" onClick={() => setIsEditing(false)} className="app-btn app-btn-outline" disabled={saving}>
                 Cancel
               </button>
-              <button 
-                type="submit" 
-                className="app-btn app-btn-solid"
-                disabled={saving}
-              >
+              <button type="submit" className="app-btn app-btn-solid" disabled={saving}>
                 {saving ? "Saving..." : "Save Changes"}
               </button>
             </div>
           </form>
         ) : (
-          <div className="app-details-grid">
-            <article className="app-detail-item">
-              <label>Location</label>
-              <p>{farm.location || "Not specified"}</p>
+          <div className="farm-details-grid">
+            <article className="farm-details-panel">
+              <h2 className="farm-details-panel-title">Profile Snapshot</h2>
+              <dl className="farm-details-list">
+                {profileItems.map((item) => (
+                  <div key={item.label} className="farm-details-row">
+                    <dt>{item.label}</dt>
+                    <dd>{item.value}</dd>
+                  </div>
+                ))}
+              </dl>
             </article>
-            <article className="app-detail-item">
-              <label>Size</label>
-              <p>{farm.sizeHectares} Hectares</p>
+
+            <article className="farm-details-panel">
+              <h2 className="farm-details-panel-title">Operations</h2>
+              <dl className="farm-details-list">
+                {operationItems.map((item) => (
+                  <div key={item.label} className="farm-details-row">
+                    <dt>{item.label}</dt>
+                    <dd>{item.value}</dd>
+                  </div>
+                ))}
+              </dl>
             </article>
-            <article className="app-detail-item">
-              <label>Manager</label>
-              <p>{farm.managerName || "Not assigned"}</p>
+
+            <article className="farm-details-panel">
+              <h2 className="farm-details-panel-title">Management</h2>
+              <dl className="farm-details-list">
+                {contactItems.map((item) => (
+                  <div key={item.label} className="farm-details-row">
+                    <dt>{item.label}</dt>
+                    <dd>{item.value}</dd>
+                  </div>
+                ))}
+              </dl>
             </article>
-            <article className="app-detail-item">
-              <label>Contact</label>
-              <p>{farm.contactPhone || "No contact info"}</p>
-            </article>
-            <article className="app-detail-item">
-              <label>Soil Type</label>
-              <p>{farm.soilType || "Not specified"}</p>
-            </article>
-            <article className="app-detail-item">
-              <label>Water Source</label>
-              <p>{farm.waterSource || "Not specified"}</p>
-            </article>
-            <article className="app-detail-item">
-              <label>Ownership</label>
-              <p>{farm.ownershipType || "Not specified"}</p>
-            </article>
-            <article className="app-detail-item">
-              <label>Created At</label>
-              <p>{new Date(farm.createdAt).toLocaleDateString()}</p>
-            </article>
+
             {farm.notes && (
-              <article className="app-detail-item full-width" style={{ gridColumn: "1 / -1" }}>
-                <label>Notes</label>
-                <p>{farm.notes}</p>
+              <article className="farm-details-panel farm-details-panel-full">
+                <h2 className="farm-details-panel-title">Notes</h2>
+                <p className="farm-details-notes">{farm.notes}</p>
               </article>
             )}
           </div>
