@@ -83,14 +83,17 @@ function buildUserPrompt(prompt, context) {
 
 export function getRuntimeConfig(env = process.env) {
   const geminiApiKey = env.GEMINI_API_KEY || "";
-  const geminiModel = env.GEMINI_MODEL || "gemini-2.5-flash";
+  const geminiModel = env.GEMINI_MODEL || "gemini-1.5-flash";
   const ollamaModel = env.OLLAMA_MODEL || "llama3.2:3b-instruct-q4_K_M";
   const ollamaBaseUrl = (env.OLLAMA_BASE_URL || "http://127.0.0.1:11434")
     .replace(/\/$/, "");
   const useGemini = geminiApiKey.length > 0;
+  
+  // NETLIFY env var is set to "true" by Netlify automatically
   const isNetlify =
-    String(env.NETLIFY || "").toLowerCase() === NETLIFY_FLAG ||
-    Boolean(env.AWS_LAMBDA_FUNCTION_NAME);
+    String(env.NETLIFY || "").toLowerCase() === "true" ||
+    Boolean(env.AWS_LAMBDA_FUNCTION_NAME) ||
+    Boolean(env.NETLIFY_DEV);
 
   return {
     geminiApiKey,

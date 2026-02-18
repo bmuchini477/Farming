@@ -20,7 +20,10 @@ function json(statusCode, payload) {
 
 function getPath(event) {
   const pathValue = event.rawPath || event.path || "";
-  return pathValue.replace(/^\/\.netlify\/functions\/api/, "") || "/";
+  // Strip both the direct function path and the /api prefix used in redirects
+  return pathValue
+    .replace(/^\/\.netlify\/functions\/api/, "")
+    .replace(/^\/api/, "") || "/";
 }
 
 export async function handler(event) {
