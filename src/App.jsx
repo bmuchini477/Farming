@@ -23,6 +23,8 @@ import { RequireAuth } from "./features/auth/RequireAuth";
 import { RequireVerified } from "./features/auth/RequireVerified";
 import EmailVerificationPage from "./features/auth/EmailVerificationPage";
 import AccountPendingPage from "./features/auth/AccountPendingPage";
+import FarmManagementPage from "./features/farms/FarmManagementPage";
+
 
 function App() {
   return (
@@ -63,6 +65,8 @@ function App() {
           >
             <Route index element={<DashboardPage />} />
             <Route path="farms/new" element={<AddFarmPage />} />
+            <Route path="farms/:id" element={<FarmManagementPage />} />
+
             <Route path="crops/new" element={<AddCropPage />} />
             <Route path="crops/:id" element={<CropDetailPage />} />
             <Route path="monitoring" element={<FieldMonitoringHubPage />} />

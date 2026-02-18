@@ -127,7 +127,13 @@ export default function ProjectionPage() {
         <section key={row.farm.id} className="app-card">
           <div className="app-card-head app-card-head-split">
             <div>
-              <h2 className="app-title-sm">{row.farm.name}</h2>
+              {isAdmin ? (
+                <Link to={`/app/farms/${row.farm.id}`} className="app-title-link">
+                  <h2 className="app-title-sm">{row.farm.name}</h2>
+                </Link>
+              ) : (
+                <h2 className="app-title-sm">{row.farm.name}</h2>
+              )}
               <p className="app-subtitle">
                 {row.hasCapacity
                   ? `Occupied ${row.occupied.toFixed(2)} ha of ${row.farmCapacity.toFixed(2)} ha (${row.utilization}%).`
