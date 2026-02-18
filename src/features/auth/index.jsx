@@ -119,15 +119,6 @@ export default function LandingPage() {
               dashboard designed for daily farm decisions.
             </p>
 
-            <div className="lp-hero-actions">
-              <Link to="/signup" className="lp-btn lp-btn-solid">
-                Get Started
-              </Link>
-              <Link to="/login" className="lp-btn lp-btn-outline">
-                Sign In
-              </Link>
-            </div>
-
             <div className="lp-metrics">
               <div className="lp-metric">
                 <strong>120+</strong>
@@ -203,6 +194,5 @@ export default function LandingPage() {
     </div>
   );
 }
-
 
 

@@ -888,6 +888,11 @@
   color: #ffffff;
 }
 
+.app-monitoring-hero-field .app-select option {
+  color: #0f5d42;
+  background: #ffffff;
+}
+
 .app-monitoring-hero-field .app-select:disabled {
   opacity: 0.78;
 }
