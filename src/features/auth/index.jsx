@@ -32,7 +32,11 @@ export default function LandingPage() {
     temp: null,
     label: null,
     fieldHealth: null,
+    coords: null,
   });
+
+  const [isAssistantOpen, setIsAssistantOpen] = useState(false);
+  const [initialAiMessage, setInitialAiMessage] = useState("");
 
   useEffect(() => {
     let cancelled = false;
@@ -59,6 +63,7 @@ export default function LandingPage() {
             temp,
             label: weatherLabelFromCode(code),
             fieldHealth: getFieldHealth(temp, code),
+            coords,
           });
         }
       } catch {
@@ -86,6 +91,25 @@ export default function LandingPage() {
       cancelled = true;
     };
   }, []);
+
+  const handleTryAI = async () => {
+    let locationText = "my area";
+    if (weather.coords) {
+      try {
+        const res = await fetch(
+          `https://nominatim.openstreetmap.org/reverse?format=json&lat=${weather.coords.latitude}&lon=${weather.coords.longitude}`
+        );
+        const data = await res.json();
+        const city = data.address.city || data.address.town || data.address.village || data.address.suburb;
+        if (city) locationText = city;
+      } catch (err) {
+        console.warn("Reverse geocode failed:", err);
+      }
+    }
+
+    setInitialAiMessage(`What are the best farming tips and crops for ${locationText} right now given the current weather?`);
+    setIsAssistantOpen(true);
+  };
 
   if (weather.loading) {
     return <LoadingAnimation label="Preparing your farming dashboard..." scope="viewport" />;
@@ -118,6 +142,16 @@ export default function LandingPage() {
               Track crop cycles, planting and harvesting dates, weather, and analytics in one clear
               dashboard designed for daily farm decisions.
             </p>
+
+            <div className="lp-hero-cta-group">
+              <button 
+                type="button" 
+                className="lp-btn lp-btn-ai"
+                onClick={handleTryAI}
+              >
+                <span className="lp-btn-icon">✨</span> Try our AI Assistant
+              </button>
+            </div>
 
             <div className="lp-metrics">
               <div className="lp-metric">
@@ -167,7 +201,7 @@ export default function LandingPage() {
             <p>Review past seasons and generate performance reports in seconds.</p>
           </article>
 
-          <article className="lp-feature-card">
+          <article className="lp-feature-card" onClick={handleTryAI} style={{ cursor: "pointer" }}>
             <span className="lp-feature-icon" aria-hidden="true">{"\uD83E\uDD16"}</span>
             <h3>Farming Assistant</h3>
             <p>Get practical recommendations tailored to your crop and location.</p>
@@ -191,6 +225,12 @@ export default function LandingPage() {
       <footer className="lp-footer">
         <p>&copy; {new Date().getFullYear()} FarmTrack. All rights reserved.</p>
       </footer>
+
+      <FarmingAssistantFab 
+        externalOpen={isAssistantOpen}
+        setExternalOpen={setIsAssistantOpen}
+        initialMessage={initialAiMessage}
+      />
     </div>
   );
 }

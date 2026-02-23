@@ -111,9 +111,13 @@ function buildBackendErrorHint(error) {
   return "Assistant API request failed.";
 }
 
-export default function FarmingAssistantFab() {
+export default function FarmingAssistantFab({ 
+  externalOpen, 
+  setExternalOpen, 
+  initialMessage 
+}) {
   const { user } = useAuth();
-  const [open, setOpen] = useState(false);
+  const [internalOpen, setInternalOpen] = useState(false);
   const [input, setInput] = useState("");
   const [messages, setMessages] = useState(starter);
   const [sending, setSending] = useState(false);
@@ -122,10 +126,19 @@ export default function FarmingAssistantFab() {
     label: "Ready",
   });
 
+  const isOpen = externalOpen !== undefined ? externalOpen : internalOpen;
+  const setIsOpen = setExternalOpen || setInternalOpen;
+
   const quickPrompts = useMemo(
     () => ["Crop stage tips", "Weather planning", "Pest prevention", "Report insights"],
     []
   );
+
+  useEffect(() => {
+    if (isOpen && initialMessage && messages.length === 1) {
+      send(initialMessage);
+    }
+  }, [isOpen, initialMessage]);
 
   async function send(text) {
     const trimmed = text.trim();
@@ -137,27 +150,32 @@ export default function FarmingAssistantFab() {
     setSending(true);
     setAssistantStatus({ mode: "loading", label: "Thinking.." });
 
-    if (!user) {
-      setMessages((prev) => [
-        ...prev,
-        { role: "bot", text: "Please sign in to get personalized answers from your farm data." },
-      ]);
-      setAssistantStatus({ mode: "idle", label: "Sign in required" });
-      setSending(false);
-      return;
-    }
-
     try {
-      context = await buildAssistantContext();
+      // If user is logged in, we try to get their context
+      if (user) {
+        try {
+          context = await buildAssistantContext();
+        } catch (ctxError) {
+          console.warn("Failed to build context, continuing without it:", ctxError);
+        }
+      }
+
       const result = await askAssistant(trimmed, context);
       const reply = result?.reply;
       const hasReply = typeof reply === "string" && reply.trim();
+
+      let finalReply = hasReply ? reply : buildFallbackReply(trimmed, context);
+      
+      // Guest mode hint
+      if (!user && hasReply) {
+        finalReply += "\n\n(Note: Sign in to get personalized advice based on your own farm data!)";
+      }
 
       setMessages((prev) => [
         ...prev,
         {
           role: "bot",
-          text: hasReply ? reply : buildFallbackReply(trimmed, context),
+          text: finalReply,
         },
       ]);
       setAssistantStatus({
@@ -182,7 +200,7 @@ export default function FarmingAssistantFab() {
 
   return (
     <>
-      {open && (
+      {isOpen && (
         <div className="farm-bot-panel" role="dialog" aria-label="Farming assistant">
           <div className="farm-bot-head">
             <div className="farm-bot-head-left">
@@ -191,7 +209,7 @@ export default function FarmingAssistantFab() {
                 {assistantStatus.label}
               </span>
             </div>
-            <button type="button" className="farm-bot-close" onClick={() => setOpen(false)}>
+            <button type="button" className="farm-bot-close" onClick={() => setIsOpen(false)}>
               Close
             </button>
           </div>
@@ -239,9 +257,12 @@ export default function FarmingAssistantFab() {
         </div>
       )}
 
-      <button type="button" className="farm-bot-fab" onClick={() => setOpen((v) => !v)}>
-        AI Chat
-      </button>
+      {!externalOpen && (
+        <button type="button" className="farm-bot-fab" onClick={() => setInternalOpen((v) => !v)}>
+          AI Chat
+        </button>
+      )}
     </>
   );
 }
+

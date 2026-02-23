@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useRef, useState } from "react";
+import { useEffect, useMemo, useRef, useState, useCallback } from "react";
 import { MapContainer, Marker, TileLayer, useMap, useMapEvents } from "react-leaflet";
 import L from "leaflet";
 import "leaflet/dist/leaflet.css";
@@ -42,6 +42,8 @@ function clampPoint(bounds, lat, lng) {
 function MapClickHandler({ onPick, bounds }) {
   useMapEvents({
     click(event) {
+      // We still clamp points to Zimbabwe when picking a farm location, 
+      // but the map itself can move freely.
       const picked = clampPoint(bounds, event.latlng.lat, event.latlng.lng);
       onPick(picked);
     },
@@ -63,24 +65,39 @@ function MapResizeHandler({ resizeKey }) {
   return null;
 }
 
+function ChangeView({ center }) {
+  const map = useMap();
+  useEffect(() => {
+    if (center) {
+      map.setView(center, map.getZoom());
+    }
+  }, [center, map]);
+  return null;
+}
+
 export default function ZimbabweMapPicker({
   value,
   onPick,
   center = ZIMBABWE_CENTER,
   maxBounds = ZIMBABWE_BOUNDS,
   initialZoom = 6,
-  minZoom = 6,
+  minZoom = 3, // Reduced minZoom for more flexibility
   maxZoom = 18,
   showFullscreenToggle = true,
 }) {
   const mapWrapRef = useRef(null);
   const [isFullscreen, setIsFullscreen] = useState(false);
   const [layerType, setLayerType] = useState("normal");
+  const [searchQuery, setSearchQuery] = useState("");
+  const [suggestions, setSuggestions] = useState([]);
+  const [showSuggestions, setShowSuggestions] = useState(false);
+  const [isLoadingSearch, setIsLoadingSearch] = useState(false);
 
   const markerPosition = useMemo(() => {
     if (!value) return null;
     return [value.lat, value.lng];
   }, [value]);
+  
   const activeLayer = TILE_LAYERS[layerType];
   const mapCenter = markerPosition || center;
 
@@ -104,9 +121,78 @@ export default function ZimbabweMapPicker({
     await mapWrapRef.current.requestFullscreen();
   }
 
+  const fetchSuggestions = useCallback(async (query) => {
+    if (query.length < 3) {
+      setSuggestions([]);
+      return;
+    }
+    setIsLoadingSearch(true);
+    try {
+      const response = await fetch(
+        `https://nominatim.openstreetmap.org/search?format=json&q=${encodeURIComponent(
+          query
+        )}&countrycodes=zw&limit=5`
+      );
+      const data = await response.json();
+      setSuggestions(data);
+    } catch (error) {
+      console.error("Search error:", error);
+    } finally {
+      setIsLoadingSearch(false);
+    }
+  }, []);
+
+  useEffect(() => {
+    const timer = setTimeout(() => {
+      if (searchQuery) {
+        fetchSuggestions(searchQuery);
+      }
+    }, 500);
+    return () => clearTimeout(timer);
+  }, [searchQuery, fetchSuggestions]);
+
+  const handleSelectSuggestion = (suggestion) => {
+    const lat = parseFloat(suggestion.lat);
+    const lon = parseFloat(suggestion.lon);
+    onPick({ lat, lng: lon });
+    setSearchQuery(suggestion.display_name);
+    setSuggestions([]);
+    setShowSuggestions(false);
+  };
+
   return (
     <div ref={mapWrapRef} className={`app-map-wrap ${isFullscreen ? "app-map-wrap-fullscreen" : ""}`}>
       <div className="app-map-toolbar">
+        <div className="app-map-search-container">
+          <input
+            type="text"
+            className="app-map-search-input"
+            placeholder="Search location..."
+            value={searchQuery}
+            onChange={(e) => {
+              setSearchQuery(e.target.value);
+              setShowSuggestions(true);
+            }}
+            onFocus={() => setShowSuggestions(true)}
+            onBlur={() => setTimeout(() => setShowSuggestions(false), 200)}
+          />
+          {showSuggestions && suggestions.length > 0 && (
+            <div className="app-map-suggestions">
+              {suggestions.map((s, i) => (
+                <button
+                  key={i}
+                  type="button"
+                  className="app-map-suggestion-item"
+                  onClick={() => handleSelectSuggestion(s)}
+                >
+                  {s.display_name}
+                </button>
+              ))}
+            </div>
+          )}
+          {isLoadingSearch && <div className="app-map-search-loader" />}
+        </div>
+
         <button
           type="button"
           className="app-map-tool-btn"
@@ -126,11 +212,11 @@ export default function ZimbabweMapPicker({
         zoom={initialZoom}
         minZoom={minZoom}
         maxZoom={maxZoom}
-        maxBounds={maxBounds}
-        maxBoundsViscosity={1.0}
+        // Removed maxBounds constraints to move freely
         className="app-map"
       >
         <TileLayer attribution={activeLayer.attribution} url={activeLayer.url} />
+        <ChangeView center={mapCenter} />
         <MapClickHandler onPick={onPick} bounds={maxBounds} />
         <MapResizeHandler resizeKey={`${layerType}-${isFullscreen ? "fs" : "normal"}`} />
         {markerPosition && <Marker position={markerPosition} icon={MAP_MARKER_ICON} />}
