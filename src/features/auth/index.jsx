@@ -2,6 +2,7 @@
 import { Link } from "react-router-dom";
 import "../../LandingPage.css";
 import LoadingAnimation from "../../components/LoadingAnimation";
+import FarmingAssistantFab from "../../components/FarmingAssistantFab";
 
 const DEFAULT_COORDS = { latitude: -17.8, longitude: 31.0 };
 
@@ -42,6 +43,9 @@ export default function LandingPage() {
     let cancelled = false;
 
     const fetchWeather = async (coords) => {
+      const controller = new AbortController();
+      const timeoutId = setTimeout(() => controller.abort(), 8000);
+
       try {
         const params = new URLSearchParams({
           latitude: String(coords.latitude),
@@ -50,7 +54,9 @@ export default function LandingPage() {
           timezone: "auto",
         });
 
-        const res = await fetch(`https://api.open-meteo.com/v1/forecast?${params}`);
+        const res = await fetch(`https://api.open-meteo.com/v1/forecast?${params}`, {
+          signal: controller.signal,
+        });
         const data = await res.json();
         const current = data?.current;
 
@@ -67,7 +73,7 @@ export default function LandingPage() {
               coords,
             });
           } else {
-            // Fallback if API returns sucess but no data
+            // Fallback if API returns success but no data
             setWeather((prev) => ({ ...prev, loading: false, coords }));
           }
         }
@@ -75,8 +81,22 @@ export default function LandingPage() {
         if (!cancelled) {
           setWeather((prev) => ({ ...prev, loading: false }));
         }
+      } finally {
+        clearTimeout(timeoutId);
       }
     };
+
+    // Safety timeout to ensure loading screen eventually disappears
+    const safetyTimeoutId = setTimeout(() => {
+      if (!cancelled) {
+        setWeather((prev) => {
+          if (prev.loading) {
+            return { ...prev, loading: false, label: "Weather unavailable" };
+          }
+          return prev;
+        });
+      }
+    }, 10000);
 
     if (navigator.geolocation) {
       navigator.geolocation.getCurrentPosition(
@@ -94,25 +114,17 @@ export default function LandingPage() {
 
     return () => {
       cancelled = true;
+      clearTimeout(safetyTimeoutId);
     };
   }, []);
 
   const handleTryAI = async () => {
-    let locationText = "my area";
-    if (weather.coords) {
-      try {
-        const res = await fetch(
-          `https://nominatim.openstreetmap.org/reverse?format=json&lat=${weather.coords.latitude}&lon=${weather.coords.longitude}`
-        );
-        const data = await res.json();
-        const city = data.address.city || data.address.town || data.address.village || data.address.suburb;
-        if (city) locationText = city;
-      } catch (err) {
-        console.warn("Reverse geocode failed:", err);
-      }
-    }
+    const weatherText =
+      weather.temp != null && weather.label
+        ? `${Math.round(weather.temp)}°C and ${weather.label.toLowerCase()} conditions`
+        : "current local weather";
 
-    setInitialAiMessage(`What are the best farming tips and crops for ${locationText} right now given the current weather?`);
+    setInitialAiMessage(`What are the best farming tips and crops for my area right now given ${weatherText}?`);
     setIsAssistantOpen(true);
   };
 
@@ -149,12 +161,8 @@ export default function LandingPage() {
             </p>
 
             <div className="lp-hero-cta-group">
-              <button 
-                type="button" 
-                className="lp-btn lp-btn-ai"
-                onClick={handleTryAI}
-              >
-                <span className="lp-btn-icon">✨</span> Try our AI Assistant
+              <button type="button" className="lp-btn lp-btn-ai" onClick={handleTryAI}>
+                <span className="lp-btn-icon">AI</span> Try our AI Assistant
               </button>
             </div>
 
@@ -231,7 +239,7 @@ export default function LandingPage() {
         <p>&copy; {new Date().getFullYear()} FarmTrack. All rights reserved.</p>
       </footer>
 
-      <FarmingAssistantFab 
+      <FarmingAssistantFab
         externalOpen={isAssistantOpen}
         setExternalOpen={setIsAssistantOpen}
         initialMessage={initialAiMessage}
@@ -239,5 +247,3 @@ export default function LandingPage() {
     </div>
   );
 }
-
-
