@@ -15,9 +15,10 @@ This project can run both frontend and AI API on Netlify.
 In Netlify Site Settings -> Environment Variables, add:
 
 - `GEMINI_API_KEY` = your real Gemini key
-- `GEMINI_MODEL` = `gemini-2.5-flash` (or your preferred Gemini model)
+- `GEMINI_MODEL` = `gemini-1.5-flash` (or your preferred Gemini model)
 
 Important:
+
 - On Netlify, local Ollama fallback is not available.
 - If `GEMINI_API_KEY` is missing, `/api/assistant` will return a clear error.
 
@@ -34,6 +35,7 @@ After deploy, test:
 - `https://YOUR_SITE.netlify.app/api/assistant` (POST)
 
 Expected health response includes:
+
 - `"ok": true`
 - `"provider": "gemini"`
 - `"geminiConfigured": true`

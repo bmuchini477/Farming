@@ -54,17 +54,22 @@ export default function LandingPage() {
         const data = await res.json();
         const current = data?.current;
 
-        if (!cancelled && current) {
-          const temp = current.temperature_2m;
-          const code = current.weather_code;
+        if (!cancelled) {
+          if (current) {
+            const temp = current.temperature_2m;
+            const code = current.weather_code;
 
-          setWeather({
-            loading: false,
-            temp,
-            label: weatherLabelFromCode(code),
-            fieldHealth: getFieldHealth(temp, code),
-            coords,
-          });
+            setWeather({
+              loading: false,
+              temp,
+              label: weatherLabelFromCode(code),
+              fieldHealth: getFieldHealth(temp, code),
+              coords,
+            });
+          } else {
+            // Fallback if API returns sucess but no data
+            setWeather((prev) => ({ ...prev, loading: false, coords }));
+          }
         }
       } catch {
         if (!cancelled) {
