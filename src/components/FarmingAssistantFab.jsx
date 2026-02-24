@@ -1,4 +1,4 @@
-import { useMemo, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { useAuth } from "../features/auth/AuthProvider";
 import { askAssistant } from "../features/assistant/assistantApi.service";
 import { buildAssistantContext } from "../features/assistant/assistantContext.service";
@@ -265,4 +265,3 @@ export default function FarmingAssistantFab({
     </>
   );
 }
-
