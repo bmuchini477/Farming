@@ -7,118 +7,192 @@ import "./FarmingAssistantFab.css";
 const starter = [
   {
     role: "bot",
-    text: "Hi, I am your AI farming assistant. I can answer using your farm and crop records.",
+    text: "Hi. I am your farming AI assistant. Ask anything, from quick greetings to deep farm planning.",
   },
 ];
+
+function toNumberOrNull(value) {
+  const number = Number(value);
+  return Number.isFinite(number) ? number : null;
+}
+
+function mergeAssistantContexts(userContext, guestContext) {
+  if (!userContext) return guestContext || null;
+  if (!guestContext) return userContext;
+
+  return {
+    ...userContext,
+    location: userContext.location || guestContext.location || null,
+    weather: userContext.weather || guestContext.weather || null,
+    profileMode: userContext.profileMode || guestContext.profileMode || "user-data",
+  };
+}
+
+function buildGuestContext(initialContext, browserLocation) {
+  const raw = initialContext && typeof initialContext === "object" ? initialContext : {};
+  const rawLocation = raw.location && typeof raw.location === "object" ? raw.location : {};
+  const rawWeather = raw.weather && typeof raw.weather === "object" ? raw.weather : {};
+
+  const latitude = toNumberOrNull(rawLocation.latitude ?? browserLocation?.latitude);
+  const longitude = toNumberOrNull(rawLocation.longitude ?? browserLocation?.longitude);
+  const hasCoords = latitude !== null && longitude !== null;
+
+  const hasWeather =
+    toNumberOrNull(rawWeather.temperatureC) !== null ||
+    toNumberOrNull(rawWeather.windSpeedKph) !== null ||
+    toNumberOrNull(rawWeather.precipitationMm) !== null ||
+    Boolean(rawWeather.condition) ||
+    Boolean(rawWeather.fieldHealth);
+
+  return {
+    farmCount: Number(raw.farmCount || 0),
+    cropCount: Number(raw.cropCount || 0),
+    activeCropCount: Number(raw.activeCropCount || 0),
+    farms: Array.isArray(raw.farms) ? raw.farms.slice(0, 6) : [],
+    crops: Array.isArray(raw.crops) ? raw.crops.slice(0, 10) : [],
+    cropPatterns: Array.isArray(raw.cropPatterns) ? raw.cropPatterns.slice(0, 6) : [],
+    monitoring: Array.isArray(raw.monitoring) ? raw.monitoring.slice(0, 2) : [],
+    profileMode: String(raw.profileMode || "guest-demo"),
+    location: hasCoords
+      ? {
+          name: String(rawLocation.name || browserLocation?.name || "Current location"),
+          latitude,
+          longitude,
+          source: String(rawLocation.source || browserLocation?.source || "browser"),
+        }
+      : null,
+    weather: hasWeather
+      ? {
+          temperatureC: toNumberOrNull(rawWeather.temperatureC),
+          condition: rawWeather.condition || "",
+          fieldHealth: rawWeather.fieldHealth || "",
+          windSpeedKph: toNumberOrNull(rawWeather.windSpeedKph),
+          precipitationMm: toNumberOrNull(rawWeather.precipitationMm),
+          source: rawWeather.source || "client",
+          fetchedAt: rawWeather.fetchedAt || new Date().toISOString(),
+        }
+      : null,
+    generatedAt: new Date().toISOString(),
+  };
+}
 
 function buildContextLine(context) {
   if (!context || typeof context !== "object") return "";
 
+  const parts = [];
   const farmCount = Number(context.farmCount || 0);
   const cropCount = Number(context.cropCount || 0);
   const activeCropCount = Number(context.activeCropCount || 0);
-  const firstFarm = Array.isArray(context.farms) ? context.farms.find((f) => f?.name) : null;
-  const firstActive = Array.isArray(context.crops)
-    ? context.crops.find((crop) => (crop?.status || "").toLowerCase() === "active")
-    : null;
 
-  const parts = [`Project data: ${farmCount} farms, ${cropCount} crops, ${activeCropCount} active crops`];
-  if (firstFarm?.name) parts.push(`sample farm: ${firstFarm.name}`);
-  if (firstActive?.name) parts.push(`active crop: ${firstActive.name}`);
-  return `${parts.join("; ")}.`;
+  if (farmCount || cropCount || activeCropCount) {
+    parts.push(`data: ${farmCount} farms, ${cropCount} crops, ${activeCropCount} active`);
+  }
+
+  const location = context.location && typeof context.location === "object" ? context.location : null;
+  if (location?.name) {
+    parts.push(`location: ${location.name}`);
+  } else if (location?.latitude != null && location?.longitude != null) {
+    parts.push(`location coordinates: ${location.latitude}, ${location.longitude}`);
+  }
+
+  const weather = context.weather && typeof context.weather === "object" ? context.weather : null;
+  if (weather?.temperatureC != null || weather?.condition) {
+    const weatherBits = [];
+    if (weather.temperatureC != null) weatherBits.push(`${weather.temperatureC}C`);
+    if (weather.condition) weatherBits.push(String(weather.condition).toLowerCase());
+    if (weather.fieldHealth) weatherBits.push(`field health ${String(weather.fieldHealth).toLowerCase()}`);
+    parts.push(`weather: ${weatherBits.join(", ")}`);
+  }
+
+  return parts.length ? `${parts.join("; ")}.` : "";
 }
 
 function buildFallbackReply(input, context) {
   const q = input.toLowerCase();
   const contextLine = buildContextLine(context);
-  const withContext = (message) => {
-    if (!contextLine) return message;
-    return `${message} ${contextLine}`;
-  };
+  const withContext = (message) => (contextLine ? `${message} ${contextLine}` : message);
+
+  if (/\b(hi|hello|hey|good morning|good afternoon|good evening)\b/.test(q)) {
+    return withContext(
+      "Hi. I am here and ready. You can ask about crop planning, irrigation schedules, pest control, weather risk, profit planning, or any farm decision."
+    );
+  }
+
+  if (q.includes("how are you")) {
+    return "I am ready to help. Tell me your crop, location, and current issue, and I will break it into actionable steps.";
+  }
+
+  if (q.includes("thank")) {
+    return "You are welcome. If you want, I can also give a practical 7-day action plan for your farm.";
+  }
 
   if (q.includes("stage") || q.includes("day")) {
     return withContext(
-      "Track day progress as day/current cycle (for example Day 32/120). Use the current stage block to decide watering and nutrient timing."
+      "Track progress as day/current cycle, then align watering, fertilization, and scouting to each growth stage. The biggest gains come from stage-specific timing."
     );
   }
 
   if (q.includes("irrig") || q.includes("water")) {
     return withContext(
-      "Irrigate early morning or late afternoon, then reduce watering at maturity to avoid harvest losses from high moisture."
+      "Irrigate early morning to reduce evaporation, prioritize uniform soil moisture at root depth, and reduce watering near maturity to limit disease and grain quality loss."
     );
   }
 
   if (q.includes("pest") || q.includes("disease")) {
     return withContext(
-      "Scout fields twice per week. Record hotspots by farm, isolate infected zones, and apply treatment based on crop stage and label guidance."
+      "Use integrated pest management: scouting twice weekly, threshold-based spraying, resistant varieties, and field sanitation. Treat hotspots fast and rotate active ingredients."
     );
   }
 
   if (q.includes("weather")) {
     return withContext(
-      "Use the weather panel plus alerts together. Delay spray before heavy rain and increase mulching during heat stress periods."
+      "Use forecast windows for decisions: spray when rain risk is low, irrigate before heat spikes, and protect fields before storms with drainage checks and staking where needed."
     );
   }
 
   if (q.includes("fertiliz") || q.includes("soil") || q.includes("nutrient")) {
     return withContext(
-      "Start with a soil test, then split fertilizer applications by growth stage. Add compost or mulch to improve water retention and microbial health."
-    );
-  }
-
-  if (q.includes("weed")) {
-    return withContext(
-      "Control weeds early in the season. Use a mix of mulching, timely hand/mechanical weeding, and selective herbicides only when needed."
+      "Base nutrition on soil test targets, split nitrogen into key stages, and combine mineral fertilizer with organic matter to improve retention and root-zone biology."
     );
   }
 
   if (q.includes("yield") || q.includes("harvest")) {
     return withContext(
-      "Improve yield by maintaining uniform planting density, tracking moisture stress, and harvesting at the correct maturity window to reduce field loss."
-    );
-  }
-
-  if (q.includes("report") || q.includes("history") || q.includes("analysis")) {
-    return withContext(
-      "Open Reports to export PDF/CSV and compare cycle duration, farms, and upcoming harvest windows for better planning."
-    );
-  }
-
-  if (q.includes("farm") || q.includes("add farm")) {
-    return withContext(
-      "Create farms first, each with a unique farm ID. Then attach each crop to the correct farm so dashboard cards stay accurate."
+      "For better yield: consistent stand establishment, moisture stress control during critical stages, and harvest at the right maturity window to reduce field and storage losses."
     );
   }
 
   return withContext(
-    "I can help with any farming question: crop planning, soil fertility, irrigation, weather risk, pest control, weed management, and harvest timing. Ask me a specific farming problem and your crop/location if you want a tailored answer."
+    "I can answer broadly, not only from database records. Ask me any farming or agribusiness question, and include location, crop, and growth stage for a precise recommendation."
   );
 }
 
 function buildBackendErrorHint(error) {
   const message = String(error?.message || "").toLowerCase();
   if (message.includes("ollama")) {
-    return "Cannot reach local Ollama model. Start Ollama and make sure OLLAMA_BASE_URL is correct.";
+    return "Cannot reach local Ollama model. Start Ollama and check OLLAMA_BASE_URL.";
   }
-  if (message.includes("gpt-4.1-mini") || message.includes("openai")) {
-    return "Old backend process is still running. Restart API so Ollama-only server is active.";
+  if (message.includes("quota") || message.includes("429")) {
+    return "AI quota limit reached. Check Gemini quota/billing or switch to another supported model.";
   }
   if (message.includes("failed to fetch")) {
-    return "Cannot reach assistant API. Start backend with `npm run api` or `npm run dev:all`.";
+    return "Cannot reach assistant API. Verify deployment and API route availability.";
   }
   if (message.includes("timed out") || message.includes("timeout")) {
-    return "Assistant API timed out. Check your model runtime and network, then try again.";
+    return "Assistant API timed out. Retry and check network/model service health.";
   }
-  if (message.includes("503")) {
-    return "Assistant API is unavailable right now.";
+  if (message.includes("503") || message.includes("unavailable")) {
+    return "Assistant API is temporarily unavailable.";
   }
   return "Assistant API request failed.";
 }
 
-export default function FarmingAssistantFab({ 
-  externalOpen, 
-  setExternalOpen, 
-  initialMessage 
+export default function FarmingAssistantFab({
+  externalOpen,
+  setExternalOpen,
+  initialMessage,
+  initialContext,
+  resetOnOpen = false,
 }) {
   const { user } = useAuth();
   const [internalOpen, setInternalOpen] = useState(false);
@@ -129,16 +203,28 @@ export default function FarmingAssistantFab({
     mode: "idle",
     label: "Ready",
   });
+  const [browserLocation, setBrowserLocation] = useState(null);
   const streamRef = useRef(null);
   const inputRef = useRef(null);
   const initialMessageSentRef = useRef("");
+  const wasOpenRef = useRef(false);
 
   const isControlled = externalOpen !== undefined;
   const canSetExternal = typeof setExternalOpen === "function";
   const isOpen = isControlled ? Boolean(externalOpen) : internalOpen;
 
+  const guestContext = useMemo(
+    () => buildGuestContext(initialContext, browserLocation),
+    [initialContext, browserLocation]
+  );
+
   const quickPrompts = useMemo(
-    () => ["Crop stage tips", "Weather planning", "Pest prevention", "Report insights"],
+    () => [
+      "Hi, what can you help with?",
+      "Suggest crops for my location",
+      "Give realistic irrigation plan",
+      "How do I prevent pest losses?",
+    ],
     []
   );
 
@@ -163,6 +249,7 @@ export default function FarmingAssistantFab({
     setMessages(starter);
     setInput("");
     setAssistantStatus({ mode: "idle", label: "Ready" });
+    initialMessageSentRef.current = "";
     inputRef.current?.focus();
   }
 
@@ -174,54 +261,98 @@ export default function FarmingAssistantFab({
     });
   }, []);
 
-  const send = useCallback(async (text) => {
-    const trimmed = text.trim();
-    if (!trimmed || sending) return;
-    let context = null;
+  const send = useCallback(
+    async (text) => {
+      const trimmed = text.trim();
+      if (!trimmed || sending) return;
+      let context = guestContext;
 
-    appendMessage({ role: "user", text: trimmed });
-    setInput("");
-    setSending(true);
-    setAssistantStatus({ mode: "loading", label: "Thinking..." });
+      appendMessage({ role: "user", text: trimmed });
+      setInput("");
+      setSending(true);
+      setAssistantStatus({ mode: "loading", label: "Thinking..." });
 
-    try {
-      // If user is logged in, we try to get their context
-      if (user?.uid) {
-        try {
-          context = await buildAssistantContext(user.uid);
-        } catch (ctxError) {
-          console.warn("Failed to build context, continuing without it:", ctxError);
+      try {
+        if (user?.uid) {
+          try {
+            const userContext = await buildAssistantContext(user.uid);
+            context = mergeAssistantContexts(userContext, guestContext);
+          } catch (ctxError) {
+            console.warn("Failed to build user context, continuing with guest context:", ctxError);
+          }
         }
+
+        const result = await askAssistant(trimmed, context);
+        const reply = result?.reply;
+        const hasReply = typeof reply === "string" && reply.trim();
+
+        appendMessage({
+          role: "bot",
+          text: hasReply ? reply : buildFallbackReply(trimmed, context),
+        });
+
+        setAssistantStatus({
+          mode: hasReply ? "live" : "fallback",
+          label: hasReply ? "Live AI" : "Smart fallback",
+        });
+      } catch (error) {
+        console.error("Assistant request failed:", error);
+        const hint = buildBackendErrorHint(error);
+        appendMessage({
+          role: "bot",
+          text: `${buildFallbackReply(trimmed, context)} (${hint} Using offline fallback.)`,
+        });
+        setAssistantStatus({ mode: "offline", label: "Offline fallback" });
+      } finally {
+        setSending(false);
       }
+    },
+    [appendMessage, guestContext, sending, user]
+  );
 
-      const result = await askAssistant(trimmed, context);
-      const reply = result?.reply;
-      const hasReply = typeof reply === "string" && reply.trim();
-
-      let finalReply = hasReply ? reply : buildFallbackReply(trimmed, context);
-      
-      // Guest mode hint
-      if (!user && hasReply) {
-        finalReply += "\n\n(Note: Sign in to get personalized advice based on your own farm data!)";
+  useEffect(() => {
+    const wasOpen = wasOpenRef.current;
+    if (!wasOpen && isOpen) {
+      if (resetOnOpen) {
+        setMessages(starter);
+        setInput("");
+        setAssistantStatus({ mode: "idle", label: "Ready" });
       }
-
-      appendMessage({ role: "bot", text: finalReply });
-      setAssistantStatus({
-        mode: hasReply ? "live" : "fallback",
-        label: hasReply ? "Live" : "Fallback reply",
-      });
-    } catch (error) {
-      console.error("Assistant request failed:", error);
-      const hint = buildBackendErrorHint(error);
-      appendMessage({
-        role: "bot",
-        text: `${buildFallbackReply(trimmed, context)} (${hint} Using offline fallback.)`,
-      });
-      setAssistantStatus({ mode: "offline", label: "Offline fallback" });
-    } finally {
-      setSending(false);
+      initialMessageSentRef.current = "";
     }
-  }, [appendMessage, sending, user]);
+    wasOpenRef.current = isOpen;
+  }, [isOpen, resetOnOpen]);
+
+  useEffect(() => {
+    if (!isOpen || user?.uid || browserLocation) return;
+    if (!navigator.geolocation) return;
+
+    let cancelled = false;
+    navigator.geolocation.getCurrentPosition(
+      (pos) => {
+        if (cancelled) return;
+        setBrowserLocation({
+          name: "Current location",
+          latitude: pos.coords.latitude,
+          longitude: pos.coords.longitude,
+          source: "browser-geolocation",
+        });
+      },
+      () => {
+        if (cancelled) return;
+        setBrowserLocation((prev) => prev || null);
+      },
+      {
+        enableHighAccuracy: false,
+        timeout: 9000,
+        maximumAge: 300000,
+      }
+    );
+
+    return () => {
+      cancelled = true;
+    };
+  }, [browserLocation, isOpen, user]);
 
   useEffect(() => {
     const prompt = String(initialMessage || "").trim();
@@ -280,7 +411,10 @@ export default function FarmingAssistantFab({
 
           <div className="farm-bot-stream" ref={streamRef} aria-live="polite">
             {messages.map((m, idx) => (
-              <div key={`${m.role}-${idx}`} className={`farm-bot-msg ${m.role === "user" ? "farm-bot-msg-user" : ""}`}>
+              <div
+                key={`${m.role}-${idx}`}
+                className={`farm-bot-msg ${m.role === "user" ? "farm-bot-msg-user" : ""}`}
+              >
                 {m.text}
               </div>
             ))}
@@ -322,7 +456,7 @@ export default function FarmingAssistantFab({
                 className="farm-bot-input"
                 disabled={sending}
                 rows={1}
-                placeholder="Ask about crops, weather, stages, or reports"
+                placeholder="Ask anything: hi, weather plan, soil, pests, yield, or farm strategy"
               />
               <button type="submit" className="farm-bot-send" disabled={sending || !input.trim()}>
                 {sending ? "Sending..." : "Send"}
@@ -341,3 +475,4 @@ export default function FarmingAssistantFab({
     </>
   );
 }
+

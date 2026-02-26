@@ -1,5 +1,5 @@
 const baseUrl = (import.meta.env.VITE_ASSISTANT_API_URL || "").trim();
-const REQUEST_TIMEOUT_MS = 30000;
+const REQUEST_TIMEOUT_MS = 45000;
 
 function resolveEndpoint() {
   if (baseUrl) return `${baseUrl.replace(/\/$/, "")}/api/assistant`;

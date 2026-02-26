@@ -1,12 +1,33 @@
-const NETLIFY_FLAG = "true";
-
 export function sanitizePrompt(input) {
   if (typeof input !== "string") return "";
   return input.trim().slice(0, 1500);
 }
 
 export function sanitizeContext(context) {
-  if (!context || typeof context !== "object") return {};
+  if (!context || typeof context !== "object") {
+    return {
+      farmCount: 0,
+      cropCount: 0,
+      activeCropCount: 0,
+      farms: [],
+      crops: [],
+      cropPatterns: [],
+      monitoring: [],
+      profileMode: "general",
+      location: null,
+      weather: null,
+      generatedAt: new Date().toISOString(),
+    };
+  }
+
+  const locationRaw =
+    context.location && typeof context.location === "object" ? context.location : null;
+  const weatherRaw =
+    context.weather && typeof context.weather === "object" ? context.weather : null;
+
+  const latitude = Number(locationRaw?.latitude);
+  const longitude = Number(locationRaw?.longitude);
+
   return {
     farmCount: Number(context.farmCount || 0),
     cropCount: Number(context.cropCount || 0),
@@ -19,6 +40,33 @@ export function sanitizeContext(context) {
     monitoring: Array.isArray(context.monitoring)
       ? context.monitoring.slice(0, 6)
       : [],
+    profileMode: String(context.profileMode || "general"),
+    location:
+      Number.isFinite(latitude) && Number.isFinite(longitude)
+        ? {
+            name: String(locationRaw?.name || "Current area").slice(0, 80),
+            latitude,
+            longitude,
+            source: String(locationRaw?.source || "client").slice(0, 48),
+          }
+        : null,
+    weather: weatherRaw
+      ? {
+          temperatureC: Number.isFinite(Number(weatherRaw.temperatureC))
+            ? Number(weatherRaw.temperatureC)
+            : null,
+          condition: String(weatherRaw.condition || "").slice(0, 80),
+          fieldHealth: String(weatherRaw.fieldHealth || "").slice(0, 40),
+          windSpeedKph: Number.isFinite(Number(weatherRaw.windSpeedKph))
+            ? Number(weatherRaw.windSpeedKph)
+            : null,
+          precipitationMm: Number.isFinite(Number(weatherRaw.precipitationMm))
+            ? Number(weatherRaw.precipitationMm)
+            : null,
+          source: String(weatherRaw.source || "client").slice(0, 48),
+          fetchedAt: weatherRaw.fetchedAt || null,
+        }
+      : null,
     generatedAt: context.generatedAt || new Date().toISOString(),
   };
 }
@@ -32,6 +80,14 @@ function summarizeContext(context) {
   const active = crops.filter(
     (crop) => (crop.status || "").toLowerCase() === "active",
   );
+  const location =
+    context.location && typeof context.location === "object"
+      ? context.location
+      : null;
+  const weather =
+    context.weather && typeof context.weather === "object"
+      ? context.weather
+      : null;
 
   const topFarms = farms
     .slice(0, 5)
@@ -48,10 +104,29 @@ function summarizeContext(context) {
   });
 
   return [
+    `Profile mode: ${context.profileMode || "general"}`,
     `Context generated at: ${context.generatedAt || "unknown"}`,
     `Farm count: ${context.farmCount || farms.length || 0}`,
     `Crop count: ${context.cropCount || crops.length || 0}`,
     `Active crop count: ${context.activeCropCount || active.length || 0}`,
+    `Location: ${
+      location
+        ? `${location.name || "Current area"} (${location.latitude}, ${location.longitude})`
+        : "unknown"
+    }`,
+    `Weather: ${
+      weather
+        ? [
+            weather.temperatureC != null ? `${weather.temperatureC}C` : null,
+            weather.condition || null,
+            weather.fieldHealth ? `field health ${weather.fieldHealth}` : null,
+            weather.windSpeedKph != null ? `wind ${weather.windSpeedKph} kph` : null,
+            weather.precipitationMm != null ? `rain ${weather.precipitationMm} mm` : null,
+          ]
+            .filter(Boolean)
+            .join(", ") || "unknown"
+        : "unknown"
+    }`,
     `Farms: ${topFarms.length ? topFarms.join("; ") : "none"}`,
     `Active crops: ${topActiveCrops.length ? topActiveCrops.join("; ") : "none"}`,
     `Monitoring bundles: ${monitoring.length}`,
@@ -60,12 +135,98 @@ function summarizeContext(context) {
 
 function systemPrompt() {
   return [
-    "You are an expert farming assistant. Analyze the provided farm data and provide specific, high-level recommendations.",
-    "Do not use conversational fillers like 'Hello' or 'It's great to connect'. Start directly with the analysis.",
-    "Focus on critical insights regarding growth, irrigation, and pest control.",
-    "Structure your response with clear headings or bullet points.",
-    "Keep the total response under 400 words but ensure it is complete and actionable.",
+    "You are FarmTrack AI, an expert agronomy and farm-operations assistant.",
+    "You must handle both interactive conversation and deep technical farming analysis.",
+    "If the user greets you or asks casual questions, respond naturally and continue the conversation.",
+    "Do not restrict answers to database records only. Use broad agricultural knowledge when records are missing.",
+    "When farm/location/weather context exists, deeply personalize advice and explain why each recommendation is realistic.",
+    "Prioritize actionable guidance: immediate actions (24-48h), short-term actions (7-14 days), and strategic actions.",
+    "Provide feasible options for low-budget and advanced setups when relevant.",
+    "Call out assumptions and uncertainties clearly, and ask 1-2 clarifying questions when needed.",
+    "Use concise headings or bullet points for readability.",
   ].join(" ");
+}
+
+function weatherLabelFromCode(code) {
+  if (code === 0) return "Clear";
+  if ([1, 2, 3].includes(code)) return "Cloudy";
+  if ([45, 48].includes(code)) return "Fog";
+  if ([51, 53, 55, 56, 57].includes(code)) return "Drizzle";
+  if ([61, 63, 65, 66, 67, 80, 81, 82].includes(code)) return "Rain";
+  if ([71, 73, 75, 77, 85, 86].includes(code)) return "Snow";
+  if ([95, 96, 99].includes(code)) return "Thunderstorm";
+  return "Mixed";
+}
+
+async function fetchCurrentWeatherForLocation(location) {
+  if (!location) return null;
+
+  const latitude = Number(location.latitude);
+  const longitude = Number(location.longitude);
+  if (!Number.isFinite(latitude) || !Number.isFinite(longitude)) return null;
+
+  const controller = new AbortController();
+  const timeoutId = setTimeout(() => controller.abort(), 7000);
+  const params = new URLSearchParams({
+    latitude: String(latitude),
+    longitude: String(longitude),
+    current: "temperature_2m,weather_code,wind_speed_10m,precipitation",
+    timezone: "auto",
+  });
+
+  try {
+    const response = await fetch(`https://api.open-meteo.com/v1/forecast?${params}`, {
+      signal: controller.signal,
+    });
+    if (!response.ok) return null;
+
+    const data = await response.json();
+    const current = data?.current;
+    if (!current) return null;
+
+    return {
+      temperatureC: Number.isFinite(Number(current.temperature_2m))
+        ? Number(current.temperature_2m)
+        : null,
+      condition: weatherLabelFromCode(Number(current.weather_code)),
+      fieldHealth: "",
+      windSpeedKph: Number.isFinite(Number(current.wind_speed_10m))
+        ? Number(current.wind_speed_10m)
+        : null,
+      precipitationMm: Number.isFinite(Number(current.precipitation))
+        ? Number(current.precipitation)
+        : null,
+      source: "open-meteo",
+      fetchedAt: new Date().toISOString(),
+    };
+  } catch {
+    return null;
+  } finally {
+    clearTimeout(timeoutId);
+  }
+}
+
+async function enrichContextWithWeather(context) {
+  if (!context || typeof context !== "object") return context;
+  const hasWeather =
+    context.weather &&
+    typeof context.weather === "object" &&
+    (context.weather.temperatureC != null ||
+      context.weather.condition ||
+      context.weather.windSpeedKph != null ||
+      context.weather.precipitationMm != null);
+
+  if (hasWeather) return context;
+  if (!context.location) return context;
+
+  const liveWeather = await fetchCurrentWeatherForLocation(context.location);
+  if (!liveWeather) return context;
+
+  return {
+    ...context,
+    weather: liveWeather,
+    generatedAt: new Date().toISOString(),
+  };
 }
 
 function buildUserPrompt(prompt, context) {
@@ -217,6 +378,7 @@ async function askOllama(prompt, context, config) {
 
 export async function generateReply(prompt, context, env = process.env) {
   const config = getRuntimeConfig(env);
+  const enrichedContext = await enrichContextWithWeather(context);
 
   if (config.useGemini) {
     const candidateModels = Array.from(
@@ -226,7 +388,10 @@ export async function generateReply(prompt, context, env = process.env) {
     let lastError = null;
     for (const model of candidateModels) {
       try {
-        return await askGemini(prompt, context, { ...config, geminiModel: model });
+        return await askGemini(prompt, enrichedContext, {
+          ...config,
+          geminiModel: model,
+        });
       } catch (error) {
         lastError = error;
         if (!isGeminiRetryableError(error)) {
@@ -248,7 +413,7 @@ export async function generateReply(prompt, context, env = process.env) {
     throw error;
   }
 
-  return askOllama(prompt, context, config);
+  return askOllama(prompt, enrichedContext, config);
 }
 
 export function buildHealth(env = process.env) {

@@ -38,6 +38,7 @@ export default function LandingPage() {
 
   const [isAssistantOpen, setIsAssistantOpen] = useState(false);
   const [initialAiMessage, setInitialAiMessage] = useState("");
+  const [initialAiContext, setInitialAiContext] = useState(null);
 
   useEffect(() => {
     let cancelled = false;
@@ -125,6 +126,25 @@ export default function LandingPage() {
         : "current local weather";
 
     setInitialAiMessage(`What are the best farming tips and crops for my area right now given ${weatherText}?`);
+    setInitialAiContext({
+      profileMode: "guest-demo",
+      location: weather.coords
+        ? {
+            name: "Current area",
+            latitude: weather.coords.latitude,
+            longitude: weather.coords.longitude,
+            source: "landing-weather",
+          }
+        : null,
+      weather: {
+        temperatureC: weather.temp,
+        condition: weather.label || "",
+        fieldHealth: weather.fieldHealth || "",
+        source: "open-meteo-client",
+        fetchedAt: new Date().toISOString(),
+      },
+      generatedAt: new Date().toISOString(),
+    });
     setIsAssistantOpen(true);
   };
 
@@ -243,6 +263,8 @@ export default function LandingPage() {
         externalOpen={isAssistantOpen}
         setExternalOpen={setIsAssistantOpen}
         initialMessage={initialAiMessage}
+        initialContext={initialAiContext}
+        resetOnOpen
       />
     </div>
   );

@@ -10,10 +10,15 @@ function toIsoDate(value) {
 }
 
 function pickFarm(row) {
+  const latitude = Number(row.latitude);
+  const longitude = Number(row.longitude);
+
   return {
     id: row.id,
     name: row.name || "",
     location: row.location || "",
+    latitude: Number.isFinite(latitude) ? latitude : null,
+    longitude: Number.isFinite(longitude) ? longitude : null,
     sizeHectares: Number(row.sizeHectares || 0),
     soilType: row.soilType || "",
     irrigationSetup: row.irrigationSetup || "",
@@ -112,6 +117,9 @@ export async function buildAssistantContext(userId) {
       crops: [],
       cropPatterns: [],
       monitoring: [],
+      profileMode: "general",
+      location: null,
+      weather: null,
       generatedAt: new Date().toISOString(),
     };
   }
@@ -129,6 +137,9 @@ export async function buildAssistantContext(userId) {
   });
 
   const activeCrops = crops.filter((crop) => (crop.status || "").toLowerCase() === "active");
+  const firstFarmWithCoordinates = farms.find(
+    (farm) => Number.isFinite(farm.latitude) && Number.isFinite(farm.longitude)
+  );
   const monitoring = [];
 
   for (const crop of activeCrops.slice(0, 6)) {
@@ -162,6 +173,16 @@ export async function buildAssistantContext(userId) {
     crops,
     cropPatterns: summarizeCropPatterns(crops),
     monitoring,
+    profileMode: "user-data",
+    location: firstFarmWithCoordinates
+      ? {
+          name: firstFarmWithCoordinates.name || firstFarmWithCoordinates.location || "Primary farm",
+          latitude: firstFarmWithCoordinates.latitude,
+          longitude: firstFarmWithCoordinates.longitude,
+          source: "farm-record",
+        }
+      : null,
+    weather: null,
     generatedAt: new Date().toISOString(),
   };
 }
