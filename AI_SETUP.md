@@ -26,7 +26,7 @@ This guide helps you set up a **FREE farming AI assistant** using Google Gemini 
 
 ```env
 GEMINI_API_KEY=your_actual_api_key_here
-GEMINI_MODEL=gemini-1.5-flash
+GEMINI_MODEL=gemini-2.5-flash
 ```
 
 ### 3️⃣ Install Dependencies
@@ -62,7 +62,7 @@ You should see:
 {
   "ok": true,
   "provider": "gemini",
-  "model": "gemini-1.5-flash",
+  "model": "gemini-2.5-flash",
   "geminiConfigured": true
 }
 ```

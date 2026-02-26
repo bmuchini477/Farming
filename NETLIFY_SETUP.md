@@ -15,7 +15,7 @@ This project can run both frontend and AI API on Netlify.
 In Netlify Site Settings -> Environment Variables, add:
 
 - `GEMINI_API_KEY` = your real Gemini key
-- `GEMINI_MODEL` = `gemini-1.5-flash` (or your preferred Gemini model)
+- `GEMINI_MODEL` = `gemini-2.5-flash` (or your preferred Gemini model)
 - `VITE_FIREBASE_API_KEY`
 - `VITE_FIREBASE_AUTH_DOMAIN`
 - `VITE_FIREBASE_PROJECT_ID`

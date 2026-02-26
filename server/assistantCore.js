@@ -83,7 +83,7 @@ function buildUserPrompt(prompt, context) {
 
 export function getRuntimeConfig(env = process.env) {
   const geminiApiKey = env.GEMINI_API_KEY || "";
-  const geminiModel = env.GEMINI_MODEL || "gemini-1.5-flash";
+  const geminiModel = env.GEMINI_MODEL || "gemini-2.5-flash";
   const ollamaModel = env.OLLAMA_MODEL || "llama3.2:3b-instruct-q4_K_M";
   const ollamaBaseUrl = (env.OLLAMA_BASE_URL || "http://127.0.0.1:11434")
     .replace(/\/$/, "");
@@ -105,9 +105,24 @@ export function getRuntimeConfig(env = process.env) {
   };
 }
 
+function isGeminiRetryableError(error) {
+  const message = String(error?.message || "").toLowerCase();
+  return (
+    message.includes("not found") ||
+    message.includes("not supported") ||
+    message.includes("quota") ||
+    message.includes("429") ||
+    message.includes("unavailable") ||
+    message.includes("503") ||
+    message.includes("timed out")
+  );
+}
+
 async function askGemini(prompt, context, config) {
   const apiUrl = `https://generativelanguage.googleapis.com/v1beta/models/${config.geminiModel}:generateContent?key=${config.geminiApiKey}`;
   const userPrompt = buildUserPrompt(prompt, context);
+  const controller = new AbortController();
+  const timeoutId = setTimeout(() => controller.abort(), 45000);
 
   let response;
   try {
@@ -123,7 +138,7 @@ async function askGemini(prompt, context, config) {
         ],
         generationConfig: {
           temperature: 0.7,
-          maxOutputTokens: 4000,
+          maxOutputTokens: 900,
           topP: 0.95,
           topK: 40,
         },
@@ -140,11 +155,15 @@ async function askGemini(prompt, context, config) {
           },
         ],
       }),
+      signal: controller.signal,
     });
   } catch (error) {
-    const err = new Error(`Failed to connect to Gemini API: ${error.message}`);
+    const reason = error?.name === "AbortError" ? "Request timed out." : error.message;
+    const err = new Error(`Failed to connect to Gemini API: ${reason}`);
     err.statusCode = 503;
     throw err;
+  } finally {
+    clearTimeout(timeoutId);
   }
 
   const data = await response.json().catch(() => ({}));
@@ -200,7 +219,25 @@ export async function generateReply(prompt, context, env = process.env) {
   const config = getRuntimeConfig(env);
 
   if (config.useGemini) {
-    return askGemini(prompt, context, config);
+    const candidateModels = Array.from(
+      new Set([config.geminiModel, "gemini-2.5-flash", "gemini-flash-latest"])
+    );
+
+    let lastError = null;
+    for (const model of candidateModels) {
+      try {
+        return await askGemini(prompt, context, { ...config, geminiModel: model });
+      } catch (error) {
+        lastError = error;
+        if (!isGeminiRetryableError(error)) {
+          throw error;
+        }
+      }
+    }
+
+    if (lastError) {
+      throw lastError;
+    }
   }
 
   if (config.isNetlify) {
