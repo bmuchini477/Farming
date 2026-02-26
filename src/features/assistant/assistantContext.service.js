@@ -1,4 +1,4 @@
-import { collection, doc, getDocs, limit, orderBy, query } from "firebase/firestore";
+import { collection, doc, getDocs, limit, orderBy, query, where } from "firebase/firestore";
 import { db } from "../../firebase/firebase";
 
 function toIsoDate(value) {
@@ -25,6 +25,7 @@ function pickFarm(row) {
 function pickCrop(row) {
   return {
     id: row.id,
+    userId: row.userId || "",
     farmId: row.farmId || "",
     farmName: row.farmName || "",
     name: row.name || row.cropName || "",
@@ -82,8 +83,12 @@ function compactRecord(id, data) {
   return out;
 }
 
-async function listShared(collectionName, max = 80) {
-  const snap = await getDocs(query(collection(db, collectionName), limit(max)));
+async function listShared(collectionName, userId, max = 80) {
+  const constraints = [limit(max)];
+  if (userId) {
+    constraints.unshift(where("userId", "==", userId));
+  }
+  const snap = await getDocs(query(collection(db, collectionName), ...constraints));
   return snap.docs.map((d) => ({ id: d.id, ...d.data() }));
 }
 
@@ -97,10 +102,23 @@ async function listSeasonEvents(ownerUserId, farmId, seasonId, collectionName) {
   }
 }
 
-export async function buildAssistantContext() {
+export async function buildAssistantContext(userId) {
+  if (!userId) {
+    return {
+      farmCount: 0,
+      cropCount: 0,
+      activeCropCount: 0,
+      farms: [],
+      crops: [],
+      cropPatterns: [],
+      monitoring: [],
+      generatedAt: new Date().toISOString(),
+    };
+  }
+
   const [farmsRaw, cropsRaw] = await Promise.all([
-    listShared("farms", 30),
-    listShared("crops", 80),
+    listShared("farms", userId, 30),
+    listShared("crops", userId, 80),
   ]);
 
   const farms = farmsRaw.map(pickFarm);
@@ -115,13 +133,14 @@ export async function buildAssistantContext() {
 
   for (const crop of activeCrops.slice(0, 6)) {
     if (!crop.farmId || !crop.seasonId) continue;
-    if (!crop.userId) continue;
+    const ownerUserId = crop.userId || userId;
+    if (!ownerUserId) continue;
 
     const [growthRecords, irrigationLogs, pestReports, fumigationSchedules] = await Promise.all([
-      listSeasonEvents(crop.userId, crop.farmId, crop.seasonId, "growthRecords"),
-      listSeasonEvents(crop.userId, crop.farmId, crop.seasonId, "irrigationLogs"),
-      listSeasonEvents(crop.userId, crop.farmId, crop.seasonId, "pestReports"),
-      listSeasonEvents(crop.userId, crop.farmId, crop.seasonId, "fumigationSchedules"),
+      listSeasonEvents(ownerUserId, crop.farmId, crop.seasonId, "growthRecords"),
+      listSeasonEvents(ownerUserId, crop.farmId, crop.seasonId, "irrigationLogs"),
+      listSeasonEvents(ownerUserId, crop.farmId, crop.seasonId, "pestReports"),
+      listSeasonEvents(ownerUserId, crop.farmId, crop.seasonId, "fumigationSchedules"),
     ]);
 
     monitoring.push({

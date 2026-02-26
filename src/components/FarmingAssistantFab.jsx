@@ -1,7 +1,8 @@
-import { useEffect, useMemo, useState } from "react";
+import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { useAuth } from "../features/auth/AuthProvider";
 import { askAssistant } from "../features/assistant/assistantApi.service";
 import { buildAssistantContext } from "../features/assistant/assistantContext.service";
+import "./FarmingAssistantFab.css";
 
 const starter = [
   {
@@ -105,6 +106,9 @@ function buildBackendErrorHint(error) {
   if (message.includes("failed to fetch")) {
     return "Cannot reach assistant API. Start backend with `npm run api` or `npm run dev:all`.";
   }
+  if (message.includes("timed out") || message.includes("timeout")) {
+    return "Assistant API timed out. Check your model runtime and network, then try again.";
+  }
   if (message.includes("503")) {
     return "Assistant API is unavailable right now.";
   }
@@ -125,36 +129,66 @@ export default function FarmingAssistantFab({
     mode: "idle",
     label: "Ready",
   });
+  const streamRef = useRef(null);
+  const inputRef = useRef(null);
+  const initialMessageSentRef = useRef("");
 
-  const isOpen = externalOpen !== undefined ? externalOpen : internalOpen;
-  const setIsOpen = setExternalOpen || setInternalOpen;
+  const isControlled = externalOpen !== undefined;
+  const canSetExternal = typeof setExternalOpen === "function";
+  const isOpen = isControlled ? Boolean(externalOpen) : internalOpen;
 
   const quickPrompts = useMemo(
     () => ["Crop stage tips", "Weather planning", "Pest prevention", "Report insights"],
     []
   );
 
-  useEffect(() => {
-    if (isOpen && initialMessage && messages.length === 1) {
-      send(initialMessage);
+  function openChat() {
+    if (isControlled) {
+      if (canSetExternal) setExternalOpen(true);
+      return;
     }
-  }, [isOpen, initialMessage]);
+    setInternalOpen(true);
+  }
 
-  async function send(text) {
+  function closeChat() {
+    if (isControlled) {
+      if (canSetExternal) setExternalOpen(false);
+      return;
+    }
+    setInternalOpen(false);
+  }
+
+  function resetChat() {
+    if (sending) return;
+    setMessages(starter);
+    setInput("");
+    setAssistantStatus({ mode: "idle", label: "Ready" });
+    inputRef.current?.focus();
+  }
+
+  const appendMessage = useCallback((nextMessage) => {
+    setMessages((prev) => {
+      const combined = [...prev, nextMessage];
+      if (combined.length <= 80) return combined;
+      return [combined[0], ...combined.slice(-79)];
+    });
+  }, []);
+
+  const send = useCallback(async (text) => {
     const trimmed = text.trim();
     if (!trimmed || sending) return;
     let context = null;
 
-    setMessages((prev) => [...prev, { role: "user", text: trimmed }]);
+    appendMessage({ role: "user", text: trimmed });
     setInput("");
     setSending(true);
-    setAssistantStatus({ mode: "loading", label: "Thinking.." });
+    setAssistantStatus({ mode: "loading", label: "Thinking..." });
 
     try {
       // If user is logged in, we try to get their context
-      if (user) {
+      if (user?.uid) {
         try {
-          context = await buildAssistantContext();
+          context = await buildAssistantContext(user.uid);
         } catch (ctxError) {
           console.warn("Failed to build context, continuing without it:", ctxError);
         }
@@ -171,13 +205,7 @@ export default function FarmingAssistantFab({
         finalReply += "\n\n(Note: Sign in to get personalized advice based on your own farm data!)";
       }
 
-      setMessages((prev) => [
-        ...prev,
-        {
-          role: "bot",
-          text: finalReply,
-        },
-      ]);
+      appendMessage({ role: "bot", text: finalReply });
       setAssistantStatus({
         mode: hasReply ? "live" : "fallback",
         label: hasReply ? "Live" : "Fallback reply",
@@ -185,18 +213,44 @@ export default function FarmingAssistantFab({
     } catch (error) {
       console.error("Assistant request failed:", error);
       const hint = buildBackendErrorHint(error);
-      setMessages((prev) => [
-        ...prev,
-        {
-          role: "bot",
-          text: `${buildFallbackReply(trimmed, context)} (${hint} Using offline fallback.)`,
-        },
-      ]);
+      appendMessage({
+        role: "bot",
+        text: `${buildFallbackReply(trimmed, context)} (${hint} Using offline fallback.)`,
+      });
       setAssistantStatus({ mode: "offline", label: "Offline fallback" });
     } finally {
       setSending(false);
     }
-  }
+  }, [appendMessage, sending, user]);
+
+  useEffect(() => {
+    const prompt = String(initialMessage || "").trim();
+    if (!isOpen || !prompt || messages.length !== 1 || sending) return;
+    if (initialMessageSentRef.current === prompt) return;
+    initialMessageSentRef.current = prompt;
+    send(prompt);
+  }, [initialMessage, isOpen, messages.length, send, sending]);
+
+  useEffect(() => {
+    if (!isOpen) return;
+    const timer = setTimeout(() => {
+      inputRef.current?.focus();
+    }, 120);
+    return () => clearTimeout(timer);
+  }, [isOpen]);
+
+  useEffect(() => {
+    const textarea = inputRef.current;
+    if (!textarea) return;
+    textarea.style.height = "0px";
+    textarea.style.height = `${Math.min(textarea.scrollHeight, 126)}px`;
+  }, [input, isOpen]);
+
+  useEffect(() => {
+    const stream = streamRef.current;
+    if (!stream || !isOpen) return;
+    stream.scrollTop = stream.scrollHeight;
+  }, [isOpen, messages, sending]);
 
   return (
     <>
@@ -209,56 +263,78 @@ export default function FarmingAssistantFab({
                 {assistantStatus.label}
               </span>
             </div>
-            <button type="button" className="farm-bot-close" onClick={() => setIsOpen(false)}>
-              Close
-            </button>
+            <div className="farm-bot-head-actions">
+              <button
+                type="button"
+                className="farm-bot-head-btn"
+                onClick={resetChat}
+                disabled={sending || messages.length <= 1}
+              >
+                New chat
+              </button>
+              <button type="button" className="farm-bot-close" onClick={closeChat}>
+                Close
+              </button>
+            </div>
           </div>
 
-          <div className="farm-bot-stream">
+          <div className="farm-bot-stream" ref={streamRef} aria-live="polite">
             {messages.map((m, idx) => (
               <div key={`${m.role}-${idx}`} className={`farm-bot-msg ${m.role === "user" ? "farm-bot-msg-user" : ""}`}>
                 {m.text}
               </div>
             ))}
+            {sending && <div className="farm-bot-msg farm-bot-msg-typing">Thinking...</div>}
           </div>
 
-          <div className="farm-bot-prompts">
-            {quickPrompts.map((prompt) => (
-              <button
-                key={prompt}
-                type="button"
-                className="farm-bot-chip"
-                onClick={() => send(prompt)}
+          <div className="farm-bot-footer">
+            <div className="farm-bot-prompts">
+              {quickPrompts.map((prompt) => (
+                <button
+                  key={prompt}
+                  type="button"
+                  className="farm-bot-chip"
+                  onClick={() => send(prompt)}
+                  disabled={sending}
+                >
+                  {prompt}
+                </button>
+              ))}
+            </div>
+
+            <form
+              className="farm-bot-input-row"
+              onSubmit={(e) => {
+                e.preventDefault();
+                send(input);
+              }}
+            >
+              <textarea
+                ref={inputRef}
+                value={input}
+                onChange={(e) => setInput(e.target.value)}
+                onKeyDown={(e) => {
+                  if (e.key === "Enter" && !e.shiftKey) {
+                    e.preventDefault();
+                    send(input);
+                  }
+                }}
+                className="farm-bot-input"
                 disabled={sending}
-              >
-                {prompt}
+                rows={1}
+                placeholder="Ask about crops, weather, stages, or reports"
+              />
+              <button type="submit" className="farm-bot-send" disabled={sending || !input.trim()}>
+                {sending ? "Sending..." : "Send"}
               </button>
-            ))}
+            </form>
+            <p className="farm-bot-hint">Press Enter to send. Use Shift+Enter for a new line.</p>
           </div>
-
-          <form
-            className="farm-bot-input-row"
-            onSubmit={(e) => {
-              e.preventDefault();
-              send(input);
-            }}
-          >
-            <input
-              value={input}
-              onChange={(e) => setInput(e.target.value)}
-              className="farm-bot-input"
-              disabled={sending}
-              placeholder="Ask about crops, weather, stages, or reports"
-            />
-            <button type="submit" className="farm-bot-send" disabled={sending}>
-              {sending ? "Sending..." : "Send"}
-            </button>
-          </form>
         </div>
       )}
 
-      {!externalOpen && (
-        <button type="button" className="farm-bot-fab" onClick={() => setInternalOpen((v) => !v)}>
+      {!isOpen && (
+        <button type="button" className="farm-bot-fab" onClick={openChat}>
           AI Chat
         </button>
       )}
