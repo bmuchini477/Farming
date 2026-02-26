@@ -144,6 +144,7 @@ function systemPrompt() {
     "Provide feasible options for low-budget and advanced setups when relevant.",
     "Call out assumptions and uncertainties clearly, and ask 1-2 clarifying questions when needed.",
     "Use concise headings or bullet points for readability.",
+    "Always complete your final sentence. Do not end with unfinished bullets or half-sentences.",
   ].join(" ");
 }
 
@@ -281,65 +282,120 @@ function isGeminiRetryableError(error) {
 
 async function askGemini(prompt, context, config) {
   const apiUrl = `https://generativelanguage.googleapis.com/v1beta/models/${config.geminiModel}:generateContent?key=${config.geminiApiKey}`;
-  const userPrompt = buildUserPrompt(prompt, context);
-  const controller = new AbortController();
-  const timeoutId = setTimeout(() => controller.abort(), 45000);
+  const basePrompt = buildUserPrompt(prompt, context);
 
-  let response;
-  try {
-    response = await fetch(apiUrl, {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({
-        contents: [
-          {
-            role: "user",
-            parts: [{ text: `${systemPrompt()}\n\n${userPrompt}` }],
+  async function requestGemini(promptText) {
+    const controller = new AbortController();
+    const timeoutId = setTimeout(() => controller.abort(), 45000);
+    let response;
+
+    try {
+      response = await fetch(apiUrl, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          contents: [
+            {
+              role: "user",
+              parts: [{ text: `${systemPrompt()}\n\n${promptText}` }],
+            },
+          ],
+          generationConfig: {
+            temperature: 0.65,
+            maxOutputTokens: 1800,
+            topP: 0.95,
+            topK: 40,
           },
-        ],
-        generationConfig: {
-          temperature: 0.7,
-          maxOutputTokens: 900,
-          topP: 0.95,
-          topK: 40,
-        },
-        safetySettings: [
-          { category: "HARM_CATEGORY_HARASSMENT", threshold: "BLOCK_NONE" },
-          { category: "HARM_CATEGORY_HATE_SPEECH", threshold: "BLOCK_NONE" },
-          {
-            category: "HARM_CATEGORY_SEXUALLY_EXPLICIT",
-            threshold: "BLOCK_NONE",
-          },
-          {
-            category: "HARM_CATEGORY_DANGEROUS_CONTENT",
-            threshold: "BLOCK_NONE",
-          },
-        ],
-      }),
-      signal: controller.signal,
-    });
-  } catch (error) {
-    const reason = error?.name === "AbortError" ? "Request timed out." : error.message;
-    const err = new Error(`Failed to connect to Gemini API: ${reason}`);
-    err.statusCode = 503;
-    throw err;
-  } finally {
-    clearTimeout(timeoutId);
+          safetySettings: [
+            { category: "HARM_CATEGORY_HARASSMENT", threshold: "BLOCK_NONE" },
+            { category: "HARM_CATEGORY_HATE_SPEECH", threshold: "BLOCK_NONE" },
+            {
+              category: "HARM_CATEGORY_SEXUALLY_EXPLICIT",
+              threshold: "BLOCK_NONE",
+            },
+            {
+              category: "HARM_CATEGORY_DANGEROUS_CONTENT",
+              threshold: "BLOCK_NONE",
+            },
+          ],
+        }),
+        signal: controller.signal,
+      });
+    } catch (error) {
+      const reason = error?.name === "AbortError" ? "Request timed out." : error.message;
+      const err = new Error(`Failed to connect to Gemini API: ${reason}`);
+      err.statusCode = 503;
+      throw err;
+    } finally {
+      clearTimeout(timeoutId);
+    }
+
+    const data = await response.json().catch(() => ({}));
+    if (!response.ok) {
+      const errorMsg = data?.error?.message || "Gemini API request failed";
+      const error = new Error(errorMsg);
+      error.statusCode = response.status;
+      throw error;
+    }
+
+    return data;
   }
 
-  const data = await response.json().catch(() => ({}));
-  if (!response.ok) {
-    const errorMsg = data?.error?.message || "Gemini API request failed";
-    const error = new Error(errorMsg);
-    error.statusCode = response.status;
-    throw error;
+  function readCandidateText(data) {
+    const parts = data?.candidates?.[0]?.content?.parts;
+    if (!Array.isArray(parts)) return "";
+    return parts
+      .map((part) => String(part?.text || ""))
+      .join("")
+      .trim();
   }
 
-  const content = data?.candidates?.[0]?.content?.parts?.[0]?.text;
-  if (!content) {
+  function needsContinuation(data, segment) {
+    const finishReason = String(data?.candidates?.[0]?.finishReason || "");
+    if (finishReason === "MAX_TOKENS") return true;
+    if (!segment) return false;
+    if (/[:;,-]\s*$/.test(segment)) return true;
+    if (/[.!?)]\s*$/.test(segment)) return false;
+    return segment.length > 100;
+  }
+
+  let collected = "";
+  let currentPrompt = basePrompt;
+
+  for (let attempt = 0; attempt < 3; attempt += 1) {
+    const data = await requestGemini(currentPrompt);
+    const segment = readCandidateText(data);
+    if (!segment) {
+      if (!collected) throw new Error("Empty response from Gemini API");
+      break;
+    }
+
+    collected = collected
+      ? `${collected}${collected.endsWith("\n") ? "" : "\n"}${segment}`
+      : segment;
+
+    if (!needsContinuation(data, segment)) break;
+
+    const tail = collected.slice(-1400);
+    currentPrompt = [
+      `Original user question: ${prompt}`,
+      "",
+      "Tail of previous partial answer:",
+      tail,
+      "",
+      "Continue exactly where this stopped. Do not repeat prior text. Finish any incomplete sentence or bullet.",
+    ].join("\n");
+  }
+
+  const finalReply = collected.trim();
+  if (!finalReply) {
     throw new Error("Empty response from Gemini API");
   }
-  return content.trim();
+  if (/[.!?)]\s*$/.test(finalReply)) return finalReply;
+  if (/[:;,-]\s*$/.test(finalReply)) {
+    return `${finalReply}\n- Continue if you want the next detailed step-by-step section.`;
+  }
+  return `${finalReply}.`;
 }
 
 async function askOllama(prompt, context, config) {
@@ -354,7 +410,7 @@ async function askOllama(prompt, context, config) {
         stream: false,
         options: {
           temperature: 0.7,
-          num_predict: 600,
+          num_predict: 1100,
         },
       }),
     });

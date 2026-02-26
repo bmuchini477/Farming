@@ -151,6 +151,7 @@
   line-height: 1.4;
   color: #334155;
   white-space: pre-wrap;
+  overflow-wrap: anywhere;
 }
 
 .farm-bot-msg-user {
@@ -163,6 +164,43 @@
 .farm-bot-msg-typing {
   font-style: italic;
   color: #3f5b66;
+}
+
+.farm-bot-rich {
+  display: grid;
+  gap: 0.22rem;
+}
+
+.farm-bot-rich-line,
+.farm-bot-rich-heading,
+.farm-bot-rich-item {
+  margin: 0;
+}
+
+.farm-bot-rich-line {
+  color: inherit;
+}
+
+.farm-bot-rich-heading {
+  font-weight: 800;
+  color: #0f5d42;
+  margin-top: 0.12rem;
+}
+
+.farm-bot-rich-item {
+  display: grid;
+  grid-template-columns: auto minmax(0, 1fr);
+  gap: 0.38rem;
+  align-items: start;
+}
+
+.farm-bot-rich-marker {
+  font-weight: 800;
+  color: #0f5d42;
+}
+
+.farm-bot-rich-gap {
+  height: 0.3rem;
 }
 
 .farm-bot-footer {

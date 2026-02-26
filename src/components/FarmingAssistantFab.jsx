@@ -187,6 +187,71 @@ function buildBackendErrorHint(error) {
   return "Assistant API request failed.";
 }
 
+function renderInlineMarkdown(text, keyPrefix) {
+  const source = String(text || "");
+  const parts = source.split(/(\*\*[^*]+\*\*)/g);
+  return parts.map((part, idx) => {
+    if (/^\*\*[^*]+\*\*$/.test(part)) {
+      return (
+        <strong key={`${keyPrefix}-bold-${idx}`}>
+          {part.slice(2, -2)}
+        </strong>
+      );
+    }
+    return part;
+  });
+}
+
+function renderBotMessage(text, keyPrefix) {
+  const lines = String(text || "").replace(/\r/g, "").split("\n");
+
+  return (
+    <div className="farm-bot-rich">
+      {lines.map((raw, idx) => {
+        const line = raw.trimEnd();
+        if (!line.trim()) {
+          return <div key={`${keyPrefix}-gap-${idx}`} className="farm-bot-rich-gap" />;
+        }
+
+        const heading = line.match(/^#{1,6}\s+(.*)$/);
+        if (heading) {
+          return (
+            <p key={`${keyPrefix}-h-${idx}`} className="farm-bot-rich-heading">
+              {renderInlineMarkdown(heading[1], `${keyPrefix}-h-${idx}`)}
+            </p>
+          );
+        }
+
+        const ordered = line.match(/^(\d+)\.\s+(.*)$/);
+        if (ordered) {
+          return (
+            <p key={`${keyPrefix}-o-${idx}`} className="farm-bot-rich-item">
+              <span className="farm-bot-rich-marker">{ordered[1]}.</span>
+              <span>{renderInlineMarkdown(ordered[2], `${keyPrefix}-o-${idx}`)}</span>
+            </p>
+          );
+        }
+
+        const bullet = line.match(/^[*-]\s+(.*)$/);
+        if (bullet) {
+          return (
+            <p key={`${keyPrefix}-b-${idx}`} className="farm-bot-rich-item">
+              <span className="farm-bot-rich-marker">•</span>
+              <span>{renderInlineMarkdown(bullet[1], `${keyPrefix}-b-${idx}`)}</span>
+            </p>
+          );
+        }
+
+        return (
+          <p key={`${keyPrefix}-p-${idx}`} className="farm-bot-rich-line">
+            {renderInlineMarkdown(line, `${keyPrefix}-p-${idx}`)}
+          </p>
+        );
+      })}
+    </div>
+  );
+}
+
 export default function FarmingAssistantFab({
   externalOpen,
   setExternalOpen,
@@ -415,7 +480,7 @@ export default function FarmingAssistantFab({
                 key={`${m.role}-${idx}`}
                 className={`farm-bot-msg ${m.role === "user" ? "farm-bot-msg-user" : ""}`}
               >
-                {m.text}
+                {m.role === "bot" ? renderBotMessage(m.text, `bot-${idx}`) : m.text}
               </div>
             ))}
             {sending && <div className="farm-bot-msg farm-bot-msg-typing">Thinking...</div>}
@@ -475,4 +540,3 @@ export default function FarmingAssistantFab({
     </>
   );
 }
-
