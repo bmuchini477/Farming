@@ -16,11 +16,19 @@ In Netlify Site Settings -> Environment Variables, add:
 
 - `GEMINI_API_KEY` = your real Gemini key
 - `GEMINI_MODEL` = `gemini-1.5-flash` (or your preferred Gemini model)
+- `VITE_FIREBASE_API_KEY`
+- `VITE_FIREBASE_AUTH_DOMAIN`
+- `VITE_FIREBASE_PROJECT_ID`
+- `VITE_FIREBASE_STORAGE_BUCKET`
+- `VITE_FIREBASE_MESSAGING_SENDER_ID`
+- `VITE_FIREBASE_APP_ID`
+- `VITE_FIREBASE_MEASUREMENT_ID` (optional)
 
 Important:
 
 - On Netlify, local Ollama fallback is not available.
 - If `GEMINI_API_KEY` is missing, `/api/assistant` will return a clear error.
+- If Firebase `VITE_*` keys are missing, frontend authentication/database features cannot initialize.
 
 ## 3) Deploy
 
