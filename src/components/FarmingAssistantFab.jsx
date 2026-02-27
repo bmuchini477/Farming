@@ -189,9 +189,10 @@ function buildBackendErrorHint(error) {
 
 function renderInlineMarkdown(text, keyPrefix) {
   const source = String(text || "");
-  const parts = source.split(/(\*\*[^*]+\*\*)/g);
+  // Handles both **bold** and __bold__
+  const parts = source.split(/(\*\*.*?\*\*|__.*?__)/g);
   return parts.map((part, idx) => {
-    if (/^\*\*[^*]+\*\*$/.test(part)) {
+    if ((part.startsWith("**") && part.endsWith("**")) || (part.startsWith("__") && part.endsWith("__"))) {
       return (
         <strong key={`${keyPrefix}-bold-${idx}`}>
           {part.slice(2, -2)}
@@ -213,11 +214,11 @@ function renderBotMessage(text, keyPrefix) {
           return <div key={`${keyPrefix}-gap-${idx}`} className="farm-bot-rich-gap" />;
         }
 
-        const heading = line.match(/^#{1,6}\s+(.*)$/);
+        const heading = line.match(/^(#{1,6})\s+(.*)$/);
         if (heading) {
           return (
-            <p key={`${keyPrefix}-h-${idx}`} className="farm-bot-rich-heading">
-              {renderInlineMarkdown(heading[1], `${keyPrefix}-h-${idx}`)}
+            <p key={`${keyPrefix}-h-${idx}`} className={`farm-bot-rich-heading farm-bot-h${heading[1].length}`}>
+              {renderInlineMarkdown(heading[2], `${keyPrefix}-h-${idx}`)}
             </p>
           );
         }
@@ -225,20 +226,20 @@ function renderBotMessage(text, keyPrefix) {
         const ordered = line.match(/^(\d+)\.\s+(.*)$/);
         if (ordered) {
           return (
-            <p key={`${keyPrefix}-o-${idx}`} className="farm-bot-rich-item">
+            <div key={`${keyPrefix}-o-${idx}`} className="farm-bot-rich-item">
               <span className="farm-bot-rich-marker">{ordered[1]}.</span>
               <span>{renderInlineMarkdown(ordered[2], `${keyPrefix}-o-${idx}`)}</span>
-            </p>
+            </div>
           );
         }
 
         const bullet = line.match(/^[*-]\s+(.*)$/);
         if (bullet) {
           return (
-            <p key={`${keyPrefix}-b-${idx}`} className="farm-bot-rich-item">
+            <div key={`${keyPrefix}-b-${idx}`} className="farm-bot-rich-item">
               <span className="farm-bot-rich-marker">•</span>
               <span>{renderInlineMarkdown(bullet[1], `${keyPrefix}-b-${idx}`)}</span>
-            </p>
+            </div>
           );
         }
 

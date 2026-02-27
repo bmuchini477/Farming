@@ -11,11 +11,17 @@
   font-size: 0.86rem;
   font-weight: 800;
   letter-spacing: 0.01em;
-  background: linear-gradient(135deg, var(--app-green-900, #065f46), var(--app-green-700, #059669));
+  background: linear-gradient(
+    135deg,
+    var(--app-green-900, #065f46),
+    var(--app-green-700, #059669)
+  );
   color: #ffffff;
   box-shadow: 0 14px 30px rgba(15, 93, 66, 0.35);
   cursor: pointer;
-  transition: transform 0.2s ease, box-shadow 0.2s ease;
+  transition:
+    transform 0.2s ease,
+    box-shadow 0.2s ease;
 }
 
 .farm-bot-fab:hover {
@@ -58,7 +64,11 @@
   align-items: center;
   justify-content: space-between;
   gap: 0.72rem;
-  background: linear-gradient(130deg, var(--app-green-900, #065f46), var(--app-green-700, #059669));
+  background: linear-gradient(
+    130deg,
+    var(--app-green-900, #065f46),
+    var(--app-green-700, #059669)
+  );
   color: #ffffff;
 }
 
@@ -88,7 +98,9 @@
   font-size: 0.73rem;
   font-weight: 700;
   cursor: pointer;
-  transition: background 0.2s ease, opacity 0.2s ease;
+  transition:
+    background 0.2s ease,
+    opacity 0.2s ease;
 }
 
 .farm-bot-head-btn:hover:not(:disabled),
@@ -184,7 +196,27 @@
 .farm-bot-rich-heading {
   font-weight: 800;
   color: #0f5d42;
-  margin-top: 0.12rem;
+  margin-top: 0.6rem;
+  margin-bottom: 0.2rem;
+}
+
+.farm-bot-h1 {
+  font-size: 1.25rem;
+}
+.farm-bot-h2 {
+  font-size: 1.15rem;
+}
+.farm-bot-h3 {
+  font-size: 1.05rem;
+}
+.farm-bot-h4 {
+  font-size: 0.95rem;
+}
+.farm-bot-h5 {
+  font-size: 0.9rem;
+}
+.farm-bot-h6 {
+  font-size: 0.85rem;
 }
 
 .farm-bot-rich-item {
@@ -192,6 +224,7 @@
   grid-template-columns: auto minmax(0, 1fr);
   gap: 0.38rem;
   align-items: start;
+  margin-bottom: 0.15rem;
 }
 
 .farm-bot-rich-marker {
@@ -200,7 +233,7 @@
 }
 
 .farm-bot-rich-gap {
-  height: 0.3rem;
+  height: 0.5rem;
 }
 
 .farm-bot-footer {
@@ -272,7 +305,9 @@
   height: 42px;
   padding: 0 0.8rem;
   cursor: pointer;
-  transition: background 0.2s ease, opacity 0.2s ease;
+  transition:
+    background 0.2s ease,
+    opacity 0.2s ease;
 }
 
 .farm-bot-send:hover:not(:disabled) {

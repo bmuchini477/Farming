@@ -21,9 +21,13 @@ export function sanitizeContext(context) {
   }
 
   const locationRaw =
-    context.location && typeof context.location === "object" ? context.location : null;
+    context.location && typeof context.location === "object"
+      ? context.location
+      : null;
   const weatherRaw =
-    context.weather && typeof context.weather === "object" ? context.weather : null;
+    context.weather && typeof context.weather === "object"
+      ? context.weather
+      : null;
 
   const latitude = Number(locationRaw?.latitude);
   const longitude = Number(locationRaw?.longitude);
@@ -120,8 +124,12 @@ function summarizeContext(context) {
             weather.temperatureC != null ? `${weather.temperatureC}C` : null,
             weather.condition || null,
             weather.fieldHealth ? `field health ${weather.fieldHealth}` : null,
-            weather.windSpeedKph != null ? `wind ${weather.windSpeedKph} kph` : null,
-            weather.precipitationMm != null ? `rain ${weather.precipitationMm} mm` : null,
+            weather.windSpeedKph != null
+              ? `wind ${weather.windSpeedKph} kph`
+              : null,
+            weather.precipitationMm != null
+              ? `rain ${weather.precipitationMm} mm`
+              : null,
           ]
             .filter(Boolean)
             .join(", ") || "unknown"
@@ -176,9 +184,12 @@ async function fetchCurrentWeatherForLocation(location) {
   });
 
   try {
-    const response = await fetch(`https://api.open-meteo.com/v1/forecast?${params}`, {
-      signal: controller.signal,
-    });
+    const response = await fetch(
+      `https://api.open-meteo.com/v1/forecast?${params}`,
+      {
+        signal: controller.signal,
+      },
+    );
     if (!response.ok) return null;
 
     const data = await response.json();
@@ -247,10 +258,11 @@ export function getRuntimeConfig(env = process.env) {
   const geminiApiKey = env.GEMINI_API_KEY || "";
   const geminiModel = env.GEMINI_MODEL || "gemini-2.5-flash";
   const ollamaModel = env.OLLAMA_MODEL || "llama3.2:3b-instruct-q4_K_M";
-  const ollamaBaseUrl = (env.OLLAMA_BASE_URL || "http://127.0.0.1:11434")
-    .replace(/\/$/, "");
+  const ollamaBaseUrl = (
+    env.OLLAMA_BASE_URL || "http://127.0.0.1:11434"
+  ).replace(/\/$/, "");
   const useGemini = geminiApiKey.length > 0;
-  
+
   // NETLIFY env var is set to "true" by Netlify automatically
   const isNetlify =
     String(env.NETLIFY || "").toLowerCase() === "true" ||
@@ -322,7 +334,8 @@ async function askGemini(prompt, context, config) {
         signal: controller.signal,
       });
     } catch (error) {
-      const reason = error?.name === "AbortError" ? "Request timed out." : error.message;
+      const reason =
+        error?.name === "AbortError" ? "Request timed out." : error.message;
       const err = new Error(`Failed to connect to Gemini API: ${reason}`);
       err.statusCode = 503;
       throw err;
@@ -354,9 +367,15 @@ async function askGemini(prompt, context, config) {
     const finishReason = String(data?.candidates?.[0]?.finishReason || "");
     if (finishReason === "MAX_TOKENS") return true;
     if (!segment) return false;
+
+    // If it ends with trailing punctuation that suggests more is coming
     if (/[:;,-]\s*$/.test(segment)) return true;
+
+    // If it ends with sentence-terminating punctuation, it's probably done
     if (/[.!?)]\s*$/.test(segment)) return false;
-    return segment.length > 100;
+
+    // If it doesn't end with punctuation and is long, it's likely truncated
+    return segment.trim().length > 20;
   }
 
   let collected = "";
@@ -438,7 +457,7 @@ export async function generateReply(prompt, context, env = process.env) {
 
   if (config.useGemini) {
     const candidateModels = Array.from(
-      new Set([config.geminiModel, "gemini-2.5-flash", "gemini-flash-latest"])
+      new Set([config.geminiModel, "gemini-2.5-flash", "gemini-flash-latest"]),
     );
 
     let lastError = null;
